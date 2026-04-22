@@ -8,13 +8,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Share+Tech+Mono&display=swap');
         :root {
             --ph-orange: #ffa500;
             --ph-bg: #1b1b1b;
             --ph-card: #282828;
             --ph-text: #e0e0e0;
         }
+        /* ---- HACKER MODE ---- */
+        body.hacker-mode {
+            --ph-orange: #00ff41;
+        }
+        body.hacker-mode button,
+        body.hacker-mode .nav-link,
+        body.hacker-mode .hub-logo,
+        body.hacker-mode input,
+        body.hacker-mode textarea {
+            font-family: 'Share Tech Mono', monospace !important;
+        }
+        body.hacker-mode .hub { background: #00ff41 !important; }
+        body.hacker-mode #toast { background: #00ff41 !important; color: #000 !important; }
+
         body { background-color: #000; color: var(--ph-text); font-family: 'Roboto', sans-serif; margin: 0; overflow-x: hidden; }
         .hub-logo { font-weight: 900; font-size: 24px; letter-spacing: -1px; display: flex; align-items: center; }
         .hub-logo .cine { color: #fff; }
@@ -48,114 +62,67 @@
         .video-card:hover .video-card-menu { display: flex; }
         .thumb-preview { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; display: none; }
         .thumb-preview.visible { display: block; }
+
+        /* Like button */
+        .like-btn { transition: all 0.15s; }
+        .like-btn.liked { color: var(--ph-orange) !important; }
+        .like-btn.liked i { color: var(--ph-orange) !important; }
+
+        /* Comments */
+        #comments-section { border-top: 1px solid #333; margin-top: 1.5rem; padding-top: 1rem; }
+        .comment-item { background: #1b1b1b; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; }
+        .comment-item .c-author { font-size: 11px; font-weight: 900; color: var(--ph-orange); }
+        .comment-item .c-text { font-size: 13px; color: #ddd; margin-top: 2px; }
+        .comment-item .c-date { font-size: 10px; color: #555; margin-top: 4px; }
+
+        /* Video upload drop zone */
+        #video-drop-zone { border: 2px dashed #444; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+        #video-drop-zone:hover, #video-drop-zone.drag-over { border-color: var(--ph-orange); background: rgba(255,165,0,0.05); }
+        #video-drop-zone input[type=file] { display: none; }
+
+        /* Hacker easter egg animation */
+        @keyframes matrix-flash {
+            0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
+        }
+        .hacker-flash { animation: matrix-flash 0.3s ease 3; }
     </style>
 </head>
 <body class="custom-scrollbar">
 
 <!-- AGE VERIFICATION OVERLAY -->
-<div id="age-gate" style="
-    position: fixed;
-    inset: 0;
-    background: #1b1b1b;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    font-family: 'Roboto', sans-serif;
-">
-    <div style="
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-radius: 8px;
-        max-width: 420px;
-        width: 100%;
-        padding: 2.5rem 2rem;
-        text-align: center;
-        box-shadow: 0 0 60px rgba(0,0,0,0.8);
-    ">
-        <!-- Logo -->
-        <div style="font-size: 26px; font-weight: 900; letter-spacing: -1px; margin-bottom: 1.5rem;">
+<div id="age-gate" style="position:fixed;inset:0;background:#1b1b1b;z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:'Roboto',sans-serif;">
+    <div style="background:#2a2a2a;border:1px solid #444;border-radius:8px;max-width:420px;width:100%;padding:2.5rem 2rem;text-align:center;box-shadow:0 0 60px rgba(0,0,0,0.8);">
+        <div style="font-size:26px;font-weight:900;letter-spacing:-1px;margin-bottom:1.5rem;">
             <span style="color:#fff;">CINE</span><span style="background:#ffa500;color:#000;padding:2px 8px;border-radius:4px;margin-left:2px;">HUB</span>
         </div>
-
-        <!-- Title -->
         <h1 style="color:#fff;font-size:1.5rem;font-weight:900;margin:0 0 1rem;">Bu bir yetişkin sitesi değildir</h1>
-
-        <!-- Notice Button -->
-        <div style="
-            display: inline-block;
-            border: 2px solid #ffa500;
-            border-radius: 6px;
-            padding: 10px 28px;
-            font-weight: 900;
-            font-size: 14px;
-            color: #fff;
-            margin-bottom: 1.25rem;
-            cursor: default;
-        ">Kullanıcılara Duyuru</div>
-
-        <!-- Description -->
+        <div style="display:inline-block;border:2px solid #ffa500;border-radius:6px;padding:10px 28px;font-weight:900;font-size:14px;color:#fff;margin-bottom:1.25rem;cursor:default;">Kullanıcılara Duyuru</div>
         <p style="color:#ccc;font-size:13px;line-height:1.7;margin-bottom:0.75rem;">
             Bu web sitesi yalnızca <strong style="color:#fff;">bir dalga sitesidir</strong> ve kötü içerik barındırmamaktadır. Girerek, <strong style="color:#fff;">13 yaşından büyük</strong> olduğunuzu veya bulunduğunuz bölgede arabalarda ön koltuğa binebildiğinizi ve tamamen <strong style="color:#fff;">+13 içerikleri</strong> görüntülemeyi onayladığınızı beyan etmiş olursunuz.
         </p>
         <a href="#" style="color:#ffa500;font-size:13px;font-weight:700;display:block;margin-bottom:1.5rem;text-decoration:none;">Kolluk Kuvvetlerine Bildiri Yok</a>
-
-        <!-- Buttons -->
-        <button onclick="enterSite()" style="
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 2px solid #ffa500;
-            color: #fff;
-            font-weight: 900;
-            font-size: 15px;
-            padding: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 12px;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='rgba(255,165,0,0.1)'" onmouseout="this.style.background='transparent'">
+        <button onclick="enterSite()" style="display:block;width:100%;background:transparent;border:2px solid #ffa500;color:#fff;font-weight:900;font-size:15px;padding:14px;border-radius:6px;cursor:pointer;margin-bottom:12px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,165,0,0.1)'" onmouseout="this.style.background='transparent'">
             13 yaşındayım yada büyüğüm - Gir
         </button>
-
-        <button onclick="exitSite()" style="
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 2px solid #ffa500;
-            color: #fff;
-            font-weight: 900;
-            font-size: 15px;
-            padding: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 1.5rem;
-            transition: background 0.2s;
-        " onmouseover="this.style.background='rgba(255,165,0,0.1)'" onmouseout="this.style.background='transparent'">
+        <button onclick="exitSite()" style="display:block;width:100%;background:transparent;border:2px solid #ffa500;color:#fff;font-weight:900;font-size:15px;padding:14px;border-radius:6px;cursor:pointer;margin-bottom:1.5rem;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,165,0,0.1)'" onmouseout="this.style.background='transparent'">
             13 yaşından küçüğüm - Çıkış
         </button>
-
-        <!-- Footer note -->
         <p style="color:#aaa;font-size:12px;line-height:1.6;">
-            <a href="#" style="color:#ffa500;font-weight:700;text-decoration:none;">Ebeveyn kontrolleri sayfamız</a> bu siteye erişimi nasıl kolayca açabileceğinizi açıklar.
-            <br>
+            <a href="#" style="color:#ffa500;font-weight:700;text-decoration:none;">Ebeveyn kontrolleri sayfamız</a> bu siteye erişimi nasıl kolayca açabileceğinizi açıklar.<br>
             <a href="#" style="color:#ffa500;font-weight:700;text-decoration:none;">Hizmet Şartları</a>
         </p>
-
         <p style="color:#555;font-size:11px;margin-top:1rem;">© CineHub.com, 2026</p>
     </div>
 </div>
 
 <script>
     function enterSite() {
-        document.getElementById('age-gate').style.opacity = '0';
-        document.getElementById('age-gate').style.transition = 'opacity 0.4s ease';
-        setTimeout(() => { document.getElementById('age-gate').style.display = 'none'; }, 400);
+        const el = document.getElementById('age-gate');
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.4s ease';
+        setTimeout(() => { el.style.display = 'none'; }, 400);
     }
-    function exitSite() {
-        window.location.href = 'https://www.google.com';
-    }
+    function exitSite() { window.location.href = 'https://www.google.com'; }
 </script>
 
 <div id="toast">İşlem Başarılı!</div>
@@ -186,12 +153,12 @@
             <button onclick="openUploadModal()" id="upload-btn" class="hidden text-xs font-bold bg-transparent border border-[#444] px-4 py-1.5 rounded hover:bg-[#222]">
                 <i class="fas fa-upload mr-1"></i> YÜKLE
             </button>
-            <div id="user-menu" class="hidden items-center gap-2">
+            <div id="user-menu" class="hidden items-center gap-2 relative">
                 <div class="w-8 h-8 bg-[#333] rounded-full flex items-center justify-center font-bold text-xs border border-[#444] cursor-pointer" id="user-avatar" onclick="toggleUserDropdown()">U</div>
-                <div id="user-dropdown" class="hidden absolute top-14 right-4 bg-[#222] border border-[#333] rounded shadow-xl z-50 py-1 min-w-[160px]">
+                <div id="user-dropdown" class="hidden absolute top-10 right-0 bg-[#222] border border-[#333] rounded shadow-xl z-50 py-1 min-w-[160px]">
                     <div class="px-4 py-2 text-xs text-gray-400 border-b border-[#333]" id="dropdown-email"></div>
                     <div onclick="showMyVideos()" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer"><i class="fas fa-film mr-2 text-[#ffa500]"></i>Videolarım</div>
-                    <div onclick="signOut()" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Çıkış Yap</div>
+                    <div onclick="doSignOut()" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Çıkış Yap</div>
                 </div>
             </div>
             <button onclick="openModal('login-modal')" id="login-btn" class="text-xs font-bold bg-[#333] text-white px-4 py-1.5 rounded hover:bg-[#444]">GİRİŞ</button>
@@ -239,18 +206,37 @@
                             <p class="text-[10px] text-gray-500 font-bold">ÜYE</p>
                         </div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="showToast('Beğenildi!')" class="bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444]"><i class="fas fa-thumbs-up mr-2 text-[#ffa500]"></i></button>
-                        <button onclick="showToast('Bağlantı kopyalandı!')" class="bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444]"><i class="fas fa-share mr-2"></i> Paylaş</button>
+                    <div class="flex gap-2 flex-wrap">
+                        <!-- LIKE BUTTON (functional) -->
+                        <button id="like-btn" onclick="toggleLike()" class="like-btn bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444] flex items-center gap-1">
+                            <i class="fas fa-thumbs-up text-gray-400"></i>
+                            <span id="like-count">0</span>
+                        </button>
+                        <button onclick="copyShareLink()" class="bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444]"><i class="fas fa-share mr-2"></i> Paylaş</button>
                         <button id="edit-video-btn" class="hidden bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444] text-[#ffa500]"><i class="fas fa-edit mr-2"></i> Düzenle</button>
                         <button id="delete-video-btn" class="hidden bg-[#333] px-4 py-1.5 rounded text-xs font-bold hover:bg-[#444] text-red-400"><i class="fas fa-trash mr-2"></i> Sil</button>
+                    </div>
+                </div>
+
+                <!-- COMMENTS SECTION -->
+                <div id="comments-section">
+                    <h4 class="text-sm font-bold mb-3">Yorumlar <span id="comment-count" class="text-gray-500 text-xs"></span></h4>
+                    <!-- Add comment -->
+                    <div id="comment-input-area" class="hidden mb-4 flex gap-2">
+                        <input type="text" id="comment-text" placeholder="Yorum yaz..." maxlength="300"
+                            class="flex-1 bg-[#000] border border-[#444] p-2 text-sm outline-none focus:border-[#ffa500] rounded">
+                        <button onclick="postComment()" class="bg-[#ffa500] text-black font-bold px-4 py-2 rounded text-xs hover:brightness-90">Gönder</button>
+                    </div>
+                    <div id="no-login-comment" class="text-xs text-gray-500 mb-4">Yorum yapmak için <span onclick="openModal('login-modal')" class="text-[#ffa500] cursor-pointer font-bold">giriş yap</span>.</div>
+                    <div id="comments-list">
+                        <div class="text-center py-6 text-gray-500 text-xs">Yorumlar yükleniyor...</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="w-full lg:w-[350px]">
             <h4 class="text-xs font-bold text-gray-400 mb-3 border-b border-[#333] pb-1">Sıradaki Videolar</h4>
-            <div id="sidebar-grid" class="flex flex-col gap-3"></div>
+            <div id="sidebar-grid" class="flex flex-col gap-3 custom-scrollbar" style="max-height:600px;overflow-y:auto;"></div>
         </div>
     </div>
 </main>
@@ -268,9 +254,7 @@
             <input type="email" id="login-email" placeholder="E-posta" class="w-full bg-[#000] border border-[#444] p-3 text-sm outline-none focus:border-[#ffa500] rounded">
             <input type="password" id="login-password" placeholder="Şifre" class="w-full bg-[#000] border border-[#444] p-3 text-sm outline-none focus:border-[#ffa500] rounded">
             <div id="login-error" class="text-red-400 text-xs font-bold hidden"></div>
-            <button onclick="handleLogin()" id="login-submit" class="w-full bg-[#ffa500] text-black font-bold py-3 rounded uppercase flex items-center justify-center gap-2">
-                Giriş Yap
-            </button>
+            <button onclick="handleLogin()" id="login-submit" class="w-full bg-[#ffa500] text-black font-bold py-3 rounded uppercase flex items-center justify-center gap-2">Giriş Yap</button>
         </div>
         <p class="text-center text-xs text-gray-500 mt-4">Hesabın yok mu? <span onclick="closeModal('login-modal'); openModal('register-modal')" class="text-[#ffa500] cursor-pointer font-bold">Kayıt Ol</span></p>
         <button onclick="closeModal('login-modal')" class="w-full mt-3 text-gray-500 text-xs font-bold">İptal</button>
@@ -295,18 +279,29 @@
 
 <!-- UPLOAD MODAL -->
 <div id="upload-modal" class="modal">
-    <div class="bg-[#1b1b1b] border border-[#333] w-full max-w-lg p-8 rounded shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-[#1b1b1b] border border-[#333] w-full max-w-lg p-8 rounded shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         <h2 class="text-sm font-bold mb-6 flex items-center gap-2"><i class="fas fa-upload text-[#ffa500]"></i> VİDEO YÜKLE</h2>
-        
         <div class="space-y-4">
-            <!-- YouTube URL -->
+
+            <!-- MP4 Upload Drop Zone -->
             <div>
-                <label class="text-xs font-bold text-gray-400 block mb-1">YouTube Video URL / ID *</label>
-                <input type="text" id="upload-yt-url" placeholder="https://youtube.com/watch?v=... veya video ID" 
-                    class="w-full bg-[#000] border border-[#444] p-3 text-sm outline-none focus:border-[#ffa500] rounded"
-                    oninput="previewYoutubeThumb()">
-                <p class="text-[10px] text-gray-600 mt-1">Örnek: https://youtu.be/dQw4w9WgXcQ</p>
+                <label class="text-xs font-bold text-gray-400 block mb-2">MP4 Video Dosyası * <span class="text-gray-600 font-normal">(Maks. 90 saniye)</span></label>
+                <div id="video-drop-zone" ondragover="handleVideoDragOver(event)" ondragleave="handleVideoDragLeave()" ondrop="handleVideoDrop(event)" onclick="document.getElementById('video-file-input').click()">
+                    <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/ogg" onchange="handleVideoFile(event)">
+                    <i class="fas fa-film text-3xl text-gray-600 mb-3 block"></i>
+                    <p class="text-sm font-bold text-gray-400">Sürükle & Bırak veya Tıkla</p>
+                    <p class="text-xs text-gray-600 mt-1">MP4, WebM, OGG — Maks. 90sn</p>
+                </div>
+                <div id="video-file-info" class="hidden mt-2 text-xs text-[#ffa500] font-bold"></div>
+                <div class="progress-bar hidden mt-2" id="video-progress-bar">
+                    <div class="progress-bar-fill" id="video-progress-fill"></div>
+                </div>
             </div>
+
+            <!-- Hidden video element for duration check & thumbnail extraction -->
+            <video id="video-checker" style="display:none;" preload="metadata" muted></video>
+            <!-- Thumbnail canvas (hidden) -->
+            <canvas id="thumb-canvas" style="display:none;"></canvas>
 
             <!-- Title -->
             <div>
@@ -322,12 +317,15 @@
                     class="w-full bg-[#000] border border-[#444] p-3 text-sm outline-none focus:border-[#ffa500] rounded resize-none"></textarea>
             </div>
 
-            <!-- Thumbnail URL -->
+            <!-- Thumbnail -->
             <div>
-                <label class="text-xs font-bold text-gray-400 block mb-2">Kapak Resmi URL *</label>
-                <input type="text" id="thumb-url-input" placeholder="https://... resim URL'si"
-                    class="w-full bg-[#000] border border-[#444] p-3 text-sm outline-none focus:border-[#ffa500] rounded"
-                    oninput="previewUrlThumb()">
+                <label class="text-xs font-bold text-gray-400 block mb-2">Kapak Resmi</label>
+                <p class="text-[10px] text-gray-600 mb-2">Otomatik video karesi alınır. İstersen kendi resmini seç:</p>
+                <div class="upload-drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)" onclick="document.getElementById('thumb-file-input').click()">
+                    <input type="file" id="thumb-file-input" accept="image/*" onchange="handleThumbFile(event)">
+                    <i class="fas fa-image text-2xl text-gray-600 mb-2 block"></i>
+                    <p class="text-xs text-gray-500">Kapak resmi seç (opsiyonel)</p>
+                </div>
                 <img id="thumb-preview" class="thumb-preview mt-3" alt="Kapak önizleme">
             </div>
 
@@ -388,10 +386,17 @@
 <!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-storage.js";
+    import {
+        getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+        signOut as fbSignOut, onAuthStateChanged, updateProfile
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import {
+        getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
+        query, orderBy, serverTimestamp, onSnapshot, getDoc, setDoc,
+        arrayUnion, arrayRemove, increment
+    } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+    // ===================== FIREBASE CONFIG =====================
     const firebaseConfig = {
         apiKey: "AIzaSyCZA4Dfd08U1rxxbx_c0peWoxaEUV35c9Y",
         authDomain: "cinehub-3442e.firebaseapp.com",
@@ -405,62 +410,101 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
-    // ---- State ----
+    // ===================== CLOUDINARY CONFIG =====================
+    // Kendi bilgilerini aşağıya gir:
+    const CLOUDINARY_CLOUD_NAME = 'dwjvyduro';
+    const CLOUDINARY_UPLOAD_PRESET = 'CineHub';
+
+    // ===================== STATE =====================
     let currentUser = null;
     let allVideos = [];
-    let thumbFileToUpload = null;
-    let editThumbFileToUpload = null;
-    let editThumbUrlToUse = null;
     let currentPlayingVideo = null;
+    let videoFileToUpload = null;
+    let thumbFileToUpload = null;
+    let editThumbUrlToUse = null;
+    let commentsUnsubscribe = null;
+    let autoThumbnailBlob = null;
 
-    // ---- Auth State ----
+    // ===================== HACKER MODE (Easter Egg) =====================
+    let hackerBuffer = '';
+    const HACKER_CODE = 'eymen';
+    document.addEventListener('keydown', (e) => {
+        // --- ACIL ÇIKIŞ: Ctrl + Alt + Shift + F12 + F11 ---
+        if (e.ctrlKey && e.altKey && e.shiftKey && (e.key === 'F12' || e.key === 'F11')) {
+            emergencyExit();
+            return;
+        }
+        // Hacker buffer — only if no input is focused
+        const active = document.activeElement;
+        const isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
+        if (!isInput && e.key.length === 1) {
+            hackerBuffer += e.key.toLowerCase();
+            if (hackerBuffer.length > HACKER_CODE.length) {
+                hackerBuffer = hackerBuffer.slice(-HACKER_CODE.length);
+            }
+            if (hackerBuffer === HACKER_CODE) {
+                activateHackerMode();
+                hackerBuffer = '';
+            }
+        }
+    });
+
+    function emergencyExit() {
+        window.location.href = 'https://www.google.com';
+    }
+
+    function activateHackerMode() {
+        document.body.classList.toggle('hacker-mode');
+        document.body.classList.add('hacker-flash');
+        setTimeout(() => document.body.classList.remove('hacker-flash'), 900);
+        if (document.body.classList.contains('hacker-mode')) {
+            showToast('🟢 HACKER MODE ACTIVATED');
+        } else {
+            showToast('🔶 Normal mod geri yüklendi');
+        }
+    }
+    window.emergencyExit = emergencyExit;
+
+    // ===================== AUTH STATE =====================
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
         updateAuthUI(user);
         loadVideos();
     });
 
-    // ---- UI Helpers ----
+    // ===================== UI HELPERS =====================
     window.openModal = (id) => document.getElementById(id).classList.add('open');
     window.closeModal = (id) => document.getElementById(id).classList.remove('open');
     window.showToast = (msg, isError = false) => {
         const t = document.getElementById('toast');
         t.textContent = msg;
         t.className = isError ? 'show error' : 'show';
-        setTimeout(() => t.className = '', 2800);
+        setTimeout(() => { t.className = ''; }, 2800);
+    };
+    window.copyShareLink = () => {
+        navigator.clipboard.writeText(window.location.href).catch(() => {});
+        showToast('Bağlantı kopyalandı!');
     };
 
     function updateAuthUI(user) {
-        const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
+        document.getElementById('login-btn').classList.toggle('hidden', !!user);
+        document.getElementById('register-btn').classList.toggle('hidden', !!user);
         const userMenu = document.getElementById('user-menu');
-        const uploadBtn = document.getElementById('upload-btn');
-        const userAvatar = document.getElementById('user-avatar');
-        const dropdownEmail = document.getElementById('dropdown-email');
-
+        userMenu.classList.toggle('hidden', !user);
+        userMenu.classList.toggle('flex', !!user);
+        document.getElementById('upload-btn').classList.toggle('hidden', !user);
         if (user) {
-            loginBtn.classList.add('hidden');
-            registerBtn.classList.add('hidden');
-            userMenu.classList.remove('hidden');
-            userMenu.classList.add('flex');
-            uploadBtn.classList.remove('hidden');
             const initials = (user.displayName || user.email || 'U').substring(0, 2).toUpperCase();
-            userAvatar.textContent = initials;
-            dropdownEmail.textContent = user.displayName || user.email;
-        } else {
-            loginBtn.classList.remove('hidden');
-            registerBtn.classList.remove('hidden');
-            userMenu.classList.add('hidden');
-            userMenu.classList.remove('flex');
-            uploadBtn.classList.add('hidden');
+            document.getElementById('user-avatar').textContent = initials;
+            document.getElementById('dropdown-email').textContent = user.displayName || user.email;
         }
+        document.getElementById('comment-input-area').classList.toggle('hidden', !user);
+        document.getElementById('no-login-comment').classList.toggle('hidden', !!user);
     }
 
     window.toggleUserDropdown = () => {
-        const dd = document.getElementById('user-dropdown');
-        dd.classList.toggle('hidden');
+        document.getElementById('user-dropdown').classList.toggle('hidden');
     };
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#user-menu')) {
@@ -468,7 +512,7 @@
         }
     });
 
-    // ---- Auth Actions ----
+    // ===================== AUTH ACTIONS =====================
     window.handleLogin = async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
@@ -508,9 +552,7 @@
             await updateProfile(cred.user, { displayName: name });
             closeModal('register-modal');
             showToast('Hesap oluşturuldu! 🎉');
-            document.getElementById('reg-name').value = '';
-            document.getElementById('reg-email').value = '';
-            document.getElementById('reg-password').value = '';
+            ['reg-name','reg-email','reg-password'].forEach(id => document.getElementById(id).value = '');
         } catch (e) {
             errEl.textContent = getAuthError(e.code);
             errEl.classList.remove('hidden');
@@ -519,7 +561,7 @@
         btn.disabled = false;
     };
 
-    window.signOut = async () => {
+    window.doSignOut = async () => {
         await fbSignOut(auth);
         showToast('Çıkış yapıldı.');
         showPage('home');
@@ -530,7 +572,7 @@
             'auth/user-not-found': 'Bu e-posta ile kayıtlı hesap bulunamadı.',
             'auth/wrong-password': 'Şifre yanlış.',
             'auth/email-already-in-use': 'Bu e-posta zaten kullanımda.',
-            'auth/invalid-email': 'Geçersiz e-posta adresi.',
+            'auth/invalid-email': 'Geçersiz e-posta.',
             'auth/weak-password': 'Şifre çok zayıf.',
             'auth/too-many-requests': 'Çok fazla deneme. Lütfen bekleyin.',
             'auth/invalid-credential': 'E-posta veya şifre hatalı.',
@@ -538,7 +580,7 @@
         return map[code] || 'Bir hata oluştu: ' + code;
     }
 
-    // ---- Video Load ----
+    // ===================== VIDEO LOAD =====================
     async function loadVideos() {
         try {
             const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
@@ -551,7 +593,7 @@
         }
     }
 
-    // ---- Render Grid ----
+    // ===================== RENDER GRID =====================
     function renderGrid(data) {
         const grid = document.getElementById('video-grid');
         document.getElementById('video-count').textContent = data.length + ' video';
@@ -561,18 +603,26 @@
         }
         grid.innerHTML = data.map(v => {
             const isOwner = currentUser && currentUser.uid === v.authorId;
+            const likeCount = v.likeCount || 0;
             return `
-            <div class="video-card cursor-pointer group relative" onclick="playVideo('${v.id}')">
-                <div class="video-thumbnail">
-                    <img src="${v.thumbnail || 'https://via.placeholder.com/320x180/1b1b1b/444?text=No+Thumb'}" 
-                         class="w-full aspect-video object-cover" 
-                         onerror="this.src='https://via.placeholder.com/320x180/1b1b1b/444?text=No+Thumb'">
-                    <span class="duration-badge"><i class="fab fa-youtube mr-1 text-red-500"></i>YT</span>
+            <div class="video-card group relative" style="cursor:default;">
+                <div class="video-thumbnail" onclick="playVideo('${v.id}')" style="cursor:pointer;">
+                    <img src="${escapeHtml(v.thumbnail || 'https://placehold.co/320x180/1b1b1b/444?text=No+Thumb')}"
+                         class="w-full aspect-video object-cover"
+                         onerror="this.src='https://placehold.co/320x180/1b1b1b/444?text=No+Thumb'">
+                    <span class="duration-badge"><i class="fas fa-video mr-1 text-[#ffa500]"></i>${v.duration ? formatDuration(v.duration) : 'MP4'}</span>
                 </div>
-                <div class="mt-2">
-                    <h3 class="text-xs font-bold line-clamp-2 text-white group-hover:text-[#ffa500]">${escapeHtml(v.title)}</h3>
+                <div class="mt-2 px-1">
+                    <h3 class="text-xs font-bold line-clamp-2 text-white group-hover:text-[#ffa500] cursor-pointer" onclick="playVideo('${v.id}')">${escapeHtml(v.title)}</h3>
                     <p class="text-[10px] text-gray-500 font-bold mt-1 uppercase">${escapeHtml(v.authorName || 'Anonim')}</p>
-                    <p class="text-[10px] text-gray-500 font-bold">${formatDate(v.createdAt)}</p>
+                    <div class="flex items-center justify-between mt-1">
+                        <p class="text-[10px] text-gray-500 font-bold">${formatDate(v.createdAt)}</p>
+                        <button onclick="toggleLikeCard(event,'${v.id}')" id="card-like-${v.id}"
+                            class="like-btn flex items-center gap-1 text-[10px] font-bold text-gray-500 hover:text-[#ffa500] transition-colors px-1 py-0.5 rounded bg-[#1a1a1a]">
+                            <i class="fas fa-thumbs-up text-[10px]"></i>
+                            <span id="card-like-count-${v.id}">${likeCount}</span>
+                        </button>
+                    </div>
                 </div>
                 ${isOwner ? `
                 <div class="video-card-menu absolute top-1 right-1 gap-1 z-10" onclick="event.stopPropagation()">
@@ -583,7 +633,7 @@
         }).join('');
     }
 
-    // ---- Play Video ----
+    // ===================== PLAY VIDEO =====================
     window.playVideo = (videoId) => {
         const video = allVideos.find(v => v.id === videoId);
         if (!video) return;
@@ -594,20 +644,43 @@
         document.getElementById('player-author').textContent = video.authorName || 'Anonim';
         document.getElementById('player-avatar').textContent = (video.authorName || 'A').substring(0, 2).toUpperCase();
 
-        // Owner buttons
         const isOwner = currentUser && currentUser.uid === video.authorId;
         document.getElementById('edit-video-btn').classList.toggle('hidden', !isOwner);
         document.getElementById('delete-video-btn').classList.toggle('hidden', !isOwner);
         document.getElementById('edit-video-btn').onclick = () => openEditModal(videoId);
         document.getElementById('delete-video-btn').onclick = () => openDeleteModal(videoId);
 
-        // Sidebar
+        updateLikeUI(video);
+
+        const container = document.getElementById('main-player-container');
+        if (video.videoUrl) {
+            container.innerHTML = `
+                <video id="main-video-el" controls autoplay style="width:100%;height:100%;background:#000;object-fit:contain;"
+                    src="${escapeHtml(video.videoUrl)}">
+                    Tarayıcınız video etiketini desteklemiyor.
+                </video>`;
+            const mainVidEl = document.getElementById('main-video-el');
+            mainVidEl.addEventListener('ended', () => {
+                const others = allVideos.filter(x => x.id !== videoId);
+                if (others.length > 0) {
+                    showToast('▶ Sıradaki video başlıyor...');
+                    setTimeout(() => playVideo(others[0].id), 1200);
+                }
+            });
+        } else {
+            container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500 text-sm p-8 text-center">
+                <div><i class="fas fa-film text-4xl block mb-3 opacity-30"></i>Video dosyası bulunamadı.</div>
+            </div>`;
+        }
+
         const sidebar = document.getElementById('sidebar-grid');
-        sidebar.innerHTML = allVideos.filter(x => x.id !== videoId).map(x => `
+        const others = allVideos.filter(x => x.id !== videoId);
+        sidebar.innerHTML = others.map(x => `
             <div class="flex gap-2 cursor-pointer group sidebar-item p-1 rounded" onclick="playVideo('${x.id}')">
                 <div class="w-32 aspect-video flex-shrink-0 relative">
-                    <img src="${x.thumbnail || 'https://via.placeholder.com/128x72/1b1b1b/444'}" class="w-full h-full object-cover rounded"
-                         onerror="this.src='https://via.placeholder.com/128x72/1b1b1b/444'">
+                    <img src="${escapeHtml(x.thumbnail || 'https://placehold.co/128x72/1b1b1b/444')}"
+                         class="w-full h-full object-cover rounded"
+                         onerror="this.src='https://placehold.co/128x72/1b1b1b/444'">
                 </div>
                 <div class="flex-1 min-w-0">
                     <h5 class="text-[11px] font-bold line-clamp-2 text-white group-hover:text-[#ffa500]">${escapeHtml(x.title)}</h5>
@@ -615,64 +688,371 @@
                 </div>
             </div>`).join('');
 
-        // Intro then actual video
-        const container = document.getElementById('main-player-container');
-        const ytId = extractYoutubeId(video.youtubeUrl);
-        container.innerHTML = `<video id="intro-video" style="width:100%;height:100%;object-fit:contain;background:#000;" playsinline autoplay><source src="https://i.imgur.com/LWVJJIt.mp4" type="video/mp4"></video>`;
-        const introEl = document.getElementById('intro-video');
-        let loaded = false;
-        const loadActual = () => {
-            if (loaded) return;
-            loaded = true;
-            container.innerHTML = ytId
-                ? `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`
-                : `<div class="flex items-center justify-center h-full text-gray-500 text-sm">Video ID bulunamadı.</div>`;
-        };
-        introEl.onended = loadActual;
-        introEl.onerror = loadActual;
-        setTimeout(loadActual, 6000);
-
+        loadComments(videoId);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // ---- Upload ----
+    // ===================== LIKE SYSTEM =====================
+    async function updateLikeUI(video) {
+        const likeBtn = document.getElementById('like-btn');
+        const likeCount = document.getElementById('like-count');
+        if (!video) return;
+        try {
+            const snap = await getDoc(doc(db, 'videos', video.id));
+            const data = snap.data();
+            const count = data?.likeCount || 0;
+            const likedBy = data?.likedBy || [];
+            likeCount.textContent = count;
+            const isLiked = currentUser && likedBy.includes(currentUser.uid);
+            likeBtn.classList.toggle('liked', isLiked);
+            likeBtn.querySelector('i').style.color = isLiked ? 'var(--ph-orange)' : '';
+        } catch(e) { console.error(e); }
+    }
+
+    window.toggleLike = async () => {
+        if (!currentUser) { openModal('login-modal'); return; }
+        if (!currentPlayingVideo) return;
+        const videoRef = doc(db, 'videos', currentPlayingVideo.id);
+        try {
+            const snap = await getDoc(videoRef);
+            const data = snap.data();
+            const likedBy = data?.likedBy || [];
+            const isLiked = likedBy.includes(currentUser.uid);
+            if (isLiked) {
+                await updateDoc(videoRef, { likedBy: arrayRemove(currentUser.uid), likeCount: increment(-1) });
+            } else {
+                await updateDoc(videoRef, { likedBy: arrayUnion(currentUser.uid), likeCount: increment(1) });
+            }
+            await updateLikeUI(currentPlayingVideo);
+            const idx = allVideos.findIndex(v => v.id === currentPlayingVideo.id);
+            if (idx !== -1) {
+                const freshSnap = await getDoc(videoRef);
+                allVideos[idx] = { id: currentPlayingVideo.id, ...freshSnap.data() };
+            }
+        } catch (e) {
+            showToast('Beğeni hatası: ' + e.message, true);
+        }
+    };
+
+    window.toggleLikeCard = async (event, videoId) => {
+        event.stopPropagation();
+        if (!currentUser) { openModal('login-modal'); return; }
+        const videoRef = doc(db, 'videos', videoId);
+        try {
+            const snap = await getDoc(videoRef);
+            const data = snap.data();
+            const likedBy = data?.likedBy || [];
+            const isLiked = likedBy.includes(currentUser.uid);
+            if (isLiked) {
+                await updateDoc(videoRef, { likedBy: arrayRemove(currentUser.uid), likeCount: increment(-1) });
+            } else {
+                await updateDoc(videoRef, { likedBy: arrayUnion(currentUser.uid), likeCount: increment(1) });
+            }
+            const freshSnap = await getDoc(videoRef);
+            const newData = freshSnap.data();
+            const countEl = document.getElementById('card-like-count-' + videoId);
+            if (countEl) countEl.textContent = newData?.likeCount || 0;
+            const btn = document.getElementById('card-like-' + videoId);
+            const nowLiked = (newData?.likedBy || []).includes(currentUser.uid);
+            if (btn) btn.classList.toggle('liked', nowLiked);
+        } catch(e) {
+            showToast('Beğeni hatası: ' + e.message, true);
+        }
+    };
+
+    // ===================== COMMENTS (REALTIME) =====================
+    function loadComments(videoId) {
+        if (commentsUnsubscribe) commentsUnsubscribe();
+        const q = query(
+            collection(db, 'videos', videoId, 'comments'),
+            orderBy('createdAt', 'asc')
+        );
+        commentsUnsubscribe = onSnapshot(q, (snap) => {
+            const comments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderComments(comments);
+        }, (e) => {
+            console.error('Yorum yükleme hatası:', e);
+        });
+    }
+
+    function renderComments(comments) {
+        const list = document.getElementById('comments-list');
+        const countEl = document.getElementById('comment-count');
+        countEl.textContent = `(${comments.length})`;
+        if (comments.length === 0) {
+            list.innerHTML = `<div class="text-xs text-gray-600 text-center py-4">Henüz yorum yok. İlk yorumu yap!</div>`;
+            return;
+        }
+        list.innerHTML = comments.map(c => `
+            <div class="comment-item">
+                <div class="c-author">${escapeHtml(c.authorName || 'Anonim')}</div>
+                <div class="c-text">${escapeHtml(c.text)}</div>
+                <div class="c-date">${formatDate(c.createdAt)}</div>
+            </div>`).join('');
+        list.scrollTop = list.scrollHeight;
+    }
+
+    window.postComment = async () => {
+        if (!currentUser) { openModal('login-modal'); return; }
+        if (!currentPlayingVideo) return;
+        const input = document.getElementById('comment-text');
+        const text = input.value.trim();
+        if (!text) return;
+        try {
+            await addDoc(collection(db, 'videos', currentPlayingVideo.id, 'comments'), {
+                text,
+                authorId: currentUser.uid,
+                authorName: currentUser.displayName || currentUser.email,
+                createdAt: serverTimestamp()
+            });
+            input.value = '';
+        } catch (e) {
+            showToast('Yorum gönderilemedi: ' + e.message, true);
+        }
+    };
+
+    document.getElementById('comment-text').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') postComment();
+    });
+
+    // ===================== VIDEO FILE HANDLING (MP4, 90s limit) =====================
+    window.handleVideoFile = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        processVideoFile(file);
+    };
+
+    window.handleVideoDragOver = (e) => {
+        e.preventDefault();
+        document.getElementById('video-drop-zone').classList.add('drag-over');
+    };
+    window.handleVideoDragLeave = () => {
+        document.getElementById('video-drop-zone').classList.remove('drag-over');
+    };
+    window.handleVideoDrop = (e) => {
+        e.preventDefault();
+        document.getElementById('video-drop-zone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('video/')) processVideoFile(file);
+    };
+
+    function processVideoFile(file) {
+        const checker = document.getElementById('video-checker');
+        const infoEl = document.getElementById('video-file-info');
+        infoEl.classList.remove('hidden');
+        infoEl.textContent = 'Süre kontrol ediliyor...';
+        infoEl.style.color = '#ffa500';
+
+        const url = URL.createObjectURL(file);
+        checker.src = url;
+        checker.onloadedmetadata = () => {
+            const dur = checker.duration;
+            if (dur > 90) {
+                infoEl.textContent = `❌ Video süresi ${Math.round(dur)} saniye — 90 saniyeden uzun olamaz!`;
+                infoEl.style.color = '#ef4444';
+                videoFileToUpload = null;
+                checker.src = '';
+                URL.revokeObjectURL(url);
+                return;
+            }
+            videoFileToUpload = file;
+            infoEl.textContent = `✅ ${file.name} — ${Math.round(dur)}s — ${(file.size / 1024 / 1024).toFixed(1)} MB`;
+            infoEl.style.color = '#00ff41';
+
+            // Auto thumbnail: seek to 2s or 10% of duration
+            checker.currentTime = Math.min(2, dur * 0.1);
+        };
+        checker.onseeked = () => {
+            const canvas = document.getElementById('thumb-canvas');
+            canvas.width = checker.videoWidth || 320;
+            canvas.height = checker.videoHeight || 180;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(checker, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                autoThumbnailBlob = blob;
+                const prev = document.getElementById('thumb-preview');
+                prev.src = canvas.toDataURL('image/jpeg', 0.8);
+                prev.classList.add('visible');
+            }, 'image/jpeg', 0.8);
+            URL.revokeObjectURL(url);
+        };
+        checker.onerror = () => {
+            infoEl.textContent = '❌ Video dosyası okunamadı.';
+            infoEl.style.color = '#ef4444';
+            videoFileToUpload = null;
+        };
+    }
+
+    // ===================== THUMBNAIL HANDLERS =====================
+    window.handleThumbFile = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { showToast('Kapak resmi 5MB\'dan büyük olamaz.', true); return; }
+        thumbFileToUpload = file;
+        autoThumbnailBlob = null; // manual overrides auto
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const prev = document.getElementById('thumb-preview');
+            prev.src = ev.target.result;
+            prev.classList.add('visible');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.previewEditUrlThumb = () => {
+        const url = document.getElementById('edit-thumb-url').value.trim();
+        const prev = document.getElementById('edit-thumb-preview');
+        editThumbUrlToUse = url || null;
+        if (url) { prev.src = url; prev.classList.add('visible'); }
+        else { prev.classList.remove('visible'); }
+    };
+
+    window.handleDragOver = (e) => { e.preventDefault(); document.getElementById('thumb-file-input').closest('.upload-drop-zone').classList.add('drag-over'); };
+    window.handleDragLeave = () => document.getElementById('thumb-file-input').closest('.upload-drop-zone').classList.remove('drag-over');
+    window.handleDrop = (e) => {
+        e.preventDefault();
+        document.getElementById('thumb-file-input').closest('.upload-drop-zone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            thumbFileToUpload = file;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const prev = document.getElementById('thumb-preview');
+                prev.src = ev.target.result;
+                prev.classList.add('visible');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // ===================== CLOUDINARY UPLOAD =====================
+    /**
+     * Cloudinary'ye dosya yükler ve secure_url döndürür.
+     * @param {File|Blob} file - Yüklenecek dosya
+     * @param {string} resourceType - 'video' veya 'image'
+     * @param {string|null} progressBarId - İlerleme çubuğu container ID (opsiyonel)
+     * @param {string|null} progressFillId - İlerleme çubuğu fill ID (opsiyonel)
+     * @returns {Promise<string>} secure_url
+     */
+    function uploadToCloudinary(file, resourceType, progressBarId, progressFillId) {
+        return new Promise((resolve, reject) => {
+            if (progressBarId) document.getElementById(progressBarId).classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const xhr = new XMLHttpRequest();
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+
+            xhr.open('POST', uploadUrl, true);
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable && progressFillId) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById(progressFillId).style.width = pct + '%';
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.secure_url) {
+                            resolve(data.secure_url);
+                        } else {
+                            reject(new Error('Cloudinary secure_url bulunamadı: ' + xhr.responseText));
+                        }
+                    } catch (parseErr) {
+                        reject(new Error('Cloudinary yanıtı parse edilemedi: ' + xhr.responseText));
+                    }
+                } else {
+                    let errMsg = 'Cloudinary yükleme hatası (' + xhr.status + ')';
+                    try {
+                        const errData = JSON.parse(xhr.responseText);
+                        if (errData.error?.message) errMsg = errData.error.message;
+                    } catch(_) {}
+                    reject(new Error(errMsg));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Cloudinary\'ye bağlanılamadı. İnternet bağlantınızı kontrol edin.'));
+            xhr.ontimeout = () => reject(new Error('Cloudinary yükleme zaman aşımına uğradı.'));
+
+            xhr.send(formData);
+        });
+    }
+
+    // ===================== UPLOAD =====================
     window.openUploadModal = () => {
         if (!currentUser) { openModal('login-modal'); return; }
-        document.getElementById('thumb-preview').classList.remove('visible');
-        document.getElementById('upload-yt-url').value = '';
+        videoFileToUpload = null;
+        thumbFileToUpload = null;
+        autoThumbnailBlob = null;
+        document.getElementById('video-file-input').value = '';
+        document.getElementById('thumb-file-input').value = '';
         document.getElementById('upload-title').value = '';
         document.getElementById('upload-desc').value = '';
-        document.getElementById('thumb-url-input').value = '';
         document.getElementById('upload-error').classList.add('hidden');
+        document.getElementById('video-file-info').classList.add('hidden');
+        document.getElementById('video-progress-bar').classList.add('hidden');
+        document.getElementById('video-progress-fill').style.width = '0%';
+        document.getElementById('thumb-preview').classList.remove('visible');
         openModal('upload-modal');
     };
 
     window.handleUpload = async () => {
-        const ytUrl = document.getElementById('upload-yt-url').value.trim();
         const title = document.getElementById('upload-title').value.trim();
         const description = document.getElementById('upload-desc').value.trim();
-        const thumbUrlInput = document.getElementById('thumb-url-input').value.trim();
         const errEl = document.getElementById('upload-error');
         const btn = document.getElementById('upload-submit');
         errEl.classList.add('hidden');
 
-        if (!ytUrl) { errEl.textContent = 'YouTube URL gerekli.'; errEl.classList.remove('hidden'); return; }
+        if (!videoFileToUpload) { errEl.textContent = 'Lütfen bir MP4 video seçin (maks. 90sn).'; errEl.classList.remove('hidden'); return; }
         if (!title) { errEl.textContent = 'Başlık gerekli.'; errEl.classList.remove('hidden'); return; }
-        if (!thumbUrlInput) { errEl.textContent = 'Kapak resmi URL gerekli.'; errEl.classList.remove('hidden'); return; }
 
-        btn.innerHTML = '<span class="spinner"></span> Yükleniyor...';
+        // Cloudinary config kontrolü
+        if (CLOUDINARY_CLOUD_NAME === 'BURAYA_CLOUD_NAME_YAZI' || CLOUDINARY_UPLOAD_PRESET === 'BURAYA_UPLOAD_PRESET_YAZI') {
+            errEl.textContent = '⚠️ Lütfen önce CLOUDINARY_CLOUD_NAME ve CLOUDINARY_UPLOAD_PRESET değişkenlerini kodda ayarlayın.';
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        btn.innerHTML = '<span class="spinner"></span> Cloudinary\'ye yükleniyor...';
         btn.disabled = true;
 
         try {
-            const thumbnailUrl = thumbUrlInput;
+            // 1. Videoyu Cloudinary'ye yükle
+            const videoUrl = await uploadToCloudinary(
+                videoFileToUpload,
+                'video',
+                'video-progress-bar',
+                'video-progress-fill'
+            );
 
+            // 2. Kapak resmini Cloudinary'ye yükle (manuel > otomatik > yok)
+            let thumbnailUrl = null;
+            const thumbBlob = thumbFileToUpload || autoThumbnailBlob;
+            if (thumbBlob) {
+                btn.innerHTML = '<span class="spinner"></span> Kapak resmi yükleniyor...';
+                thumbnailUrl = await uploadToCloudinary(thumbBlob, 'image', null, null);
+            }
+
+            // 3. Video süresini al
+            const checker = document.getElementById('video-checker');
+            const duration = checker.duration || null;
+
+            // 4. Firestore'a kaydet (Cloudinary secure_url'leri ile)
             await addDoc(collection(db, 'videos'), {
-                youtubeUrl: ytUrl,
+                videoUrl,
+                thumbnail: thumbnailUrl,
                 title,
                 description,
-                thumbnail: thumbnailUrl,
+                duration,
                 authorId: currentUser.uid,
                 authorName: currentUser.displayName || currentUser.email,
+                likeCount: 0,
+                likedBy: [],
                 createdAt: serverTimestamp()
             });
 
@@ -689,22 +1069,7 @@
         btn.disabled = false;
     };
 
-    async function uploadThumbnail(file, progressBarId, progressFillId) {
-        const pb = document.getElementById(progressBarId);
-        const pf = document.getElementById(progressFillId);
-        pb.classList.remove('hidden');
-        return new Promise((resolve, reject) => {
-            const storageRef = ref(storage, `thumbnails/${currentUser.uid}/${Date.now()}_${file.name}`);
-            const task = uploadBytesResumable(storageRef, file);
-            task.on('state_changed',
-                (snap) => { pf.style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
-                (err) => reject(err),
-                async () => { resolve(await getDownloadURL(task.snapshot.ref)); }
-            );
-        });
-    }
-
-    // ---- Edit ----
+    // ===================== EDIT =====================
     window.openEditModal = (videoId) => {
         const video = allVideos.find(v => v.id === videoId);
         if (!video) return;
@@ -714,7 +1079,6 @@
         document.getElementById('edit-thumb-preview').classList.remove('visible');
         document.getElementById('edit-thumb-url').value = '';
         document.getElementById('edit-error').classList.add('hidden');
-        editThumbFileToUpload = null;
         editThumbUrlToUse = null;
         if (video.thumbnail) {
             document.getElementById('edit-thumb-preview').src = video.thumbnail;
@@ -731,21 +1095,14 @@
         const btn = document.getElementById('edit-submit');
         errEl.classList.add('hidden');
         if (!title) { errEl.textContent = 'Başlık gerekli.'; errEl.classList.remove('hidden'); return; }
-
         btn.innerHTML = '<span class="spinner"></span> Kaydediliyor...';
         btn.disabled = true;
-
         try {
             const updateData = { title, description };
-
-            if (editThumbUrlToUse) {
-                updateData.thumbnail = editThumbUrlToUse;
-            }
-
+            if (editThumbUrlToUse) updateData.thumbnail = editThumbUrlToUse;
             await updateDoc(doc(db, 'videos', videoId), updateData);
             closeModal('edit-modal');
             showToast('Video güncellendi! ✅');
-            editThumbFileToUpload = null;
             editThumbUrlToUse = null;
             await loadVideos();
             if (currentPlayingVideo && currentPlayingVideo.id === videoId) {
@@ -756,16 +1113,14 @@
                 }
             }
         } catch (e) {
-            console.error(e);
             errEl.textContent = 'Hata: ' + (e.message || 'Bilinmeyen hata');
             errEl.classList.remove('hidden');
         }
-
         btn.innerHTML = 'Kaydet';
         btn.disabled = false;
     };
 
-    // ---- Delete ----
+    // ===================== DELETE =====================
     window.openDeleteModal = (videoId) => {
         document.getElementById('delete-video-id').value = videoId;
         openModal('delete-modal');
@@ -777,148 +1132,66 @@
             await deleteDoc(doc(db, 'videos', videoId));
             closeModal('delete-modal');
             showToast('Video silindi.');
-            if (currentPlayingVideo && currentPlayingVideo.id === videoId) {
-                showPage('home');
-            }
+            if (currentPlayingVideo && currentPlayingVideo.id === videoId) showPage('home');
             await loadVideos();
         } catch (e) {
             showToast('Silme hatası: ' + e.message, true);
         }
     };
 
-    // ---- My Videos ----
+    // ===================== MY VIDEOS (PROFILE) =====================
     window.showMyVideos = () => {
         document.getElementById('user-dropdown').classList.add('hidden');
-        if (!currentUser) return;
+        if (!currentUser) { openModal('login-modal'); return; }
         const myVids = allVideos.filter(v => v.authorId === currentUser.uid);
         renderGrid(myVids);
-        document.getElementById('home-title').textContent = 'Videolarım';
+        document.getElementById('home-title').textContent = `📁 Videolarım (${myVids.length})`;
         showPage('home');
     };
 
-    // ---- Search ----
+    // ===================== SEARCH =====================
     document.getElementById('search-form').onsubmit = (e) => {
         e.preventDefault();
         const q = document.getElementById('search-input').value.toLowerCase().trim();
         if (!q) { renderGrid(allVideos); document.getElementById('home-title').textContent = 'Önerilen Videolar'; return; }
-        const filtered = allVideos.filter(v => v.title.toLowerCase().includes(q) || (v.description || '').toLowerCase().includes(q) || (v.authorName || '').toLowerCase().includes(q));
+        const filtered = allVideos.filter(v =>
+            v.title.toLowerCase().includes(q) ||
+            (v.description || '').toLowerCase().includes(q) ||
+            (v.authorName || '').toLowerCase().includes(q)
+        );
         document.getElementById('home-title').textContent = `Arama: "${q}"`;
         renderGrid(filtered);
         showPage('home');
     };
 
-    // ---- Thumbnail Handlers ----
-    window.previewYoutubeThumb = () => {
-        // Just helper — no auto-thumb from YT as user provides own
-    };
-
-    window.handleThumbFile = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { showToast('Dosya 5MB\'dan büyük olamaz.', true); return; }
-        thumbFileToUpload = file;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const prev = document.getElementById('thumb-preview');
-            prev.src = ev.target.result;
-            prev.classList.add('visible');
-        };
-        reader.readAsDataURL(file);
-    };
-
-    window.previewUrlThumb = () => {
-        const url = document.getElementById('thumb-url-input').value.trim();
-        const prev = document.getElementById('thumb-preview');
-        if (url) { prev.src = url; prev.classList.add('visible'); }
-        else { prev.classList.remove('visible'); }
-    };
-
-    window.handleEditThumbFile = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        editThumbFileToUpload = file;
-        editThumbUrlToUse = null;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const prev = document.getElementById('edit-thumb-preview');
-            prev.src = ev.target.result;
-            prev.classList.add('visible');
-        };
-        reader.readAsDataURL(file);
-    };
-
-    window.previewEditUrlThumb = () => {
-        const url = document.getElementById('edit-thumb-url').value.trim();
-        const prev = document.getElementById('edit-thumb-preview');
-        editThumbUrlToUse = url || null;
-        editThumbFileToUpload = null;
-        if (url) { prev.src = url; prev.classList.add('visible'); }
-        else { prev.classList.remove('visible'); }
-    };
-
-    // ---- Drag & Drop ----
-    window.handleDragOver = (e) => { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); };
-    window.handleDragLeave = () => document.getElementById('drop-zone').classList.remove('drag-over');
-    window.handleDrop = (e) => {
-        e.preventDefault();
-        document.getElementById('drop-zone').classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const fakeEvent = { target: { files: [file] } };
-            handleThumbFile(fakeEvent);
-        }
-    };
-
-    // ---- Tabs ----
-    window.switchThumbTab = (tab) => {
-        document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
-        document.getElementById('tab-url').classList.toggle('active', tab === 'url');
-        document.getElementById('thumb-tab-upload').classList.toggle('hidden', tab !== 'upload');
-        document.getElementById('thumb-tab-url').classList.toggle('hidden', tab !== 'url');
-        document.getElementById('thumb-preview').classList.remove('visible');
-        thumbFileToUpload = null;
-    };
-
-    window.switchEditThumbTab = (tab) => {
-        document.getElementById('edit-tab-upload').classList.toggle('active', tab === 'upload');
-        document.getElementById('edit-tab-url').classList.toggle('active', tab === 'url');
-        document.getElementById('edit-thumb-tab-upload').classList.toggle('hidden', tab !== 'upload');
-        document.getElementById('edit-thumb-tab-url').classList.toggle('hidden', tab !== 'url');
-    };
-
-    // ---- Page Navigation ----
+    // ===================== PAGE NAV =====================
     window.showPage = (page) => {
         document.getElementById('view-home').classList.toggle('hidden', page !== 'home');
         document.getElementById('view-player').classList.toggle('hidden', page !== 'player');
         if (page === 'home') {
             document.getElementById('home-title').textContent = 'Önerilen Videolar';
             renderGrid(allVideos);
+            if (commentsUnsubscribe) { commentsUnsubscribe(); commentsUnsubscribe = null; }
         }
     };
 
-    // ---- Utils ----
-    function extractYoutubeId(url) {
-        if (!url) return null;
-        const patterns = [
-            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
-            /^([a-zA-Z0-9_-]{11})$/
-        ];
-        for (const p of patterns) {
-            const m = url.match(p);
-            if (m) return m[1];
-        }
-        return url.length === 11 ? url : null;
-    }
-
+    // ===================== UTILS =====================
     function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
     function formatDate(ts) {
         if (!ts) return '';
         const d = ts.toDate ? ts.toDate() : new Date(ts);
         return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function formatDuration(sec) {
+        if (!sec) return '';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m}:${s.toString().padStart(2,'0')}`;
     }
 </script>
 
