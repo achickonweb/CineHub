@@ -633,12 +633,14 @@
         }).join('');
     }
 
-    // ===================== PLAY VIDEO =====================
+    // ===================== PLAY VIDEO & INTRO SYSTEM =====================
     window.playVideo = (videoId) => {
         const video = allVideos.find(v => v.id === videoId);
         if (!video) return;
         currentPlayingVideo = video;
         showPage('player');
+        
+        // UI Bilgilerini Doldur
         document.getElementById('player-title').textContent = video.title;
         document.getElementById('player-desc').textContent = video.description || '';
         document.getElementById('player-author').textContent = video.authorName || 'Anonim';
@@ -653,26 +655,78 @@
         updateLikeUI(video);
 
         const container = document.getElementById('main-player-container');
+        
         if (video.videoUrl) {
+            // Önce controls olmadan introvideo.mp4 oynatmaya çalış
             container.innerHTML = `
-                <video id="main-video-el" controls autoplay style="width:100%;height:100%;background:#000;object-fit:contain;"
-                    src="${escapeHtml(video.videoUrl)}">
+                <video id="main-video-el" autoplay style="width:100%;height:100%;background:#000;object-fit:contain;"
+                    src="introvideo.mp4">
                     Tarayıcınız video etiketini desteklemiyor.
                 </video>`;
+                
             const mainVidEl = document.getElementById('main-video-el');
-            mainVidEl.addEventListener('ended', () => {
-                const others = allVideos.filter(x => x.id !== videoId);
-                if (others.length > 0) {
-                    showToast('▶ Sıradaki video başlıyor...');
-                    setTimeout(() => playVideo(others[0].id), 1200);
+
+            // Asıl videoya sorunsuzca geçiş yapacak fonksiyon
+            const playMainVideo = () => {
+                mainVidEl.src = escapeHtml(video.videoUrl);
+                mainVidEl.controls = true; // Asıl video başlayınca kontrolleri geri getir
+                
+                const playPromise = mainVidEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Asıl video otomatik oynatılamadı:', e));
                 }
-            });
+
+                // Asıl video bittiğinde sıradaki videoya geçme mantığı
+                mainVidEl.onended = () => {
+                    const others = allVideos.filter(x => x.id !== videoId);
+                    if (others.length > 0) {
+                        showToast('▶ Sıradaki video başlıyor...');
+                        setTimeout(() => playVideo(others[0].id), 1200);
+                    }
+                };
+
+                mainVidEl.onerror = () => {
+                    console.error("Asıl video yüklenirken hata oluştu.");
+                };
+            };
+
+            // Yedek intro (Imgur)
+            const playFallbackIntro = () => {
+                mainVidEl.src = "https://i.imgur.com/LWVJJIt.mp4";
+                const playPromise = mainVidEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => playMainVideo()); // Imgur intro da sorun yaparsa direkt asıl videoya atla
+                }
+            };
+
+            // Hata yakalama: İlk intro bozuksa veya yoksa yedek introya, yedek bozuksa asıl videoya
+            mainVidEl.onerror = () => {
+                const currentSrc = mainVidEl.src || "";
+                if (currentSrc.includes('introvideo.mp4')) {
+                    playFallbackIntro();
+                } else {
+                    playMainVideo();
+                }
+            };
+
+            // Video bittiğinde yakalama
+            mainVidEl.onended = () => {
+                const currentSrc = mainVidEl.src || "";
+                // Eğer biten şey bizim introlarımızdan biriyse asıl videoyu başlat
+                if (currentSrc.includes('introvideo.mp4') || currentSrc.includes('LWVJJIt.mp4')) {
+                    playMainVideo();
+                } else {
+                    // Bu kısım asıl video onended eventinde (yukarıdaki playMainVideo içinde) zaten ezilecek, ama güvenlik amaçlı
+                }
+            };
+
         } else {
             container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500 text-sm p-8 text-center">
                 <div><i class="fas fa-film text-4xl block mb-3 opacity-30"></i>Video dosyası bulunamadı.</div>
             </div>`;
         }
 
+        // Sidebar güncelleme işlemleri...
         const sidebar = document.getElementById('sidebar-grid');
         const others = allVideos.filter(x => x.id !== videoId);
         sidebar.innerHTML = others.map(x => `
@@ -926,14 +980,6 @@
     };
 
     // ===================== CLOUDINARY UPLOAD =====================
-    /**
-     * Cloudinary'ye dosya yükler ve secure_url döndürür.
-     * @param {File|Blob} file - Yüklenecek dosya
-     * @param {string} resourceType - 'video' veya 'image'
-     * @param {string|null} progressBarId - İlerleme çubuğu container ID (opsiyonel)
-     * @param {string|null} progressFillId - İlerleme çubuğu fill ID (opsiyonel)
-     * @returns {Promise<string>} secure_url
-     */
     function uploadToCloudinary(file, resourceType, progressBarId, progressFillId) {
         return new Promise((resolve, reject) => {
             if (progressBarId) document.getElementById(progressBarId).classList.remove('hidden');
@@ -1011,7 +1057,6 @@
         if (!videoFileToUpload) { errEl.textContent = 'Lütfen bir MP4 video seçin (maks. 90sn).'; errEl.classList.remove('hidden'); return; }
         if (!title) { errEl.textContent = 'Başlık gerekli.'; errEl.classList.remove('hidden'); return; }
 
-        // Cloudinary config kontrolü
         if (CLOUDINARY_CLOUD_NAME === 'BURAYA_CLOUD_NAME_YAZI' || CLOUDINARY_UPLOAD_PRESET === 'BURAYA_UPLOAD_PRESET_YAZI') {
             errEl.textContent = '⚠️ Lütfen önce CLOUDINARY_CLOUD_NAME ve CLOUDINARY_UPLOAD_PRESET değişkenlerini kodda ayarlayın.';
             errEl.classList.remove('hidden');
@@ -1022,7 +1067,6 @@
         btn.disabled = true;
 
         try {
-            // 1. Videoyu Cloudinary'ye yükle
             const videoUrl = await uploadToCloudinary(
                 videoFileToUpload,
                 'video',
@@ -1030,7 +1074,6 @@
                 'video-progress-fill'
             );
 
-            // 2. Kapak resmini Cloudinary'ye yükle (manuel > otomatik > yok)
             let thumbnailUrl = null;
             const thumbBlob = thumbFileToUpload || autoThumbnailBlob;
             if (thumbBlob) {
@@ -1038,11 +1081,9 @@
                 thumbnailUrl = await uploadToCloudinary(thumbBlob, 'image', null, null);
             }
 
-            // 3. Video süresini al
             const checker = document.getElementById('video-checker');
             const duration = checker.duration || null;
 
-            // 4. Firestore'a kaydet (Cloudinary secure_url'leri ile)
             await addDoc(collection(db, 'videos'), {
                 videoUrl,
                 thumbnail: thumbnailUrl,
