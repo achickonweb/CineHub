@@ -87,6 +87,70 @@
         .hacker-flash { animation: matrix-flash 0.3s ease 3; }
 
         /* ============================================================
+           FEATURE 1 — USER PROFILE PAGE
+        ============================================================ */
+        #view-profile { display: none; }
+        #view-profile.active { display: block; }
+        .profile-avatar-large {
+            width: 80px; height: 80px;
+            background: var(--ph-card);
+            border: 3px solid var(--ph-orange);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 900; color: var(--ph-orange);
+            flex-shrink: 0;
+        }
+        .profile-stat {
+            background: #1b1b1b; border: 1px solid #333; border-radius: 6px;
+            padding: 12px 20px; text-align: center; min-width: 100px;
+        }
+        .profile-stat .stat-val { font-size: 22px; font-weight: 900; color: var(--ph-orange); }
+        .profile-stat .stat-lbl { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; margin-top: 2px; }
+
+        /* ============================================================
+           FEATURE 2 — ADMIN PANEL
+        ============================================================ */
+        #admin-panel-modal .admin-table { width: 100%; border-collapse: collapse; }
+        #admin-panel-modal .admin-table th {
+            text-align: left; font-size: 10px; font-weight: 900; color: #666;
+            text-transform: uppercase; padding: 6px 8px;
+            border-bottom: 1px solid #333;
+        }
+        #admin-panel-modal .admin-table td {
+            font-size: 12px; padding: 8px; border-bottom: 1px solid #222;
+            vertical-align: middle;
+        }
+        #admin-panel-modal .admin-table tr:hover td { background: #1a1a1a; }
+        .admin-tab-btn { padding: 6px 14px; font-size: 11px; font-weight: 900; border-bottom: 2px solid transparent; cursor: pointer; color: #555; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
+        .admin-tab-btn.active { color: var(--ph-orange); border-bottom-color: var(--ph-orange); }
+
+        /* ============================================================
+           FEATURE 3 — VIDEO HOVER PREVIEW
+        ============================================================ */
+        .video-thumbnail { position: relative; overflow: hidden; }
+        .video-thumbnail .thumb-img {
+            width: 100%; aspect-ratio: 16/9; object-fit: cover;
+            display: block; transition: opacity 0.2s;
+        }
+        .video-thumbnail .thumb-vid {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .video-thumbnail.previewing .thumb-vid { opacity: 1; }
+        .video-thumbnail.previewing .thumb-img { opacity: 0; }
+
+        /* ============================================================
+           FEATURE 4 — VIEW COUNT BADGE
+        ============================================================ */
+        .views-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 10px; font-weight: 700; color: #888;
+        }
+        .views-badge i { font-size: 9px; }
+        #player-views { font-size: 12px; font-weight: 700; color: #aaa; margin-top: 4px; }
+
+        /* ============================================================
            CUSTOM VIDEO PLAYER CONTROLS
         ============================================================ */
         #cinehub-player-wrap {
@@ -388,6 +452,10 @@
             </form>
         </div>
         <div class="flex items-center gap-3" id="auth-buttons">
+            <!-- FEATURE 2: Admin panel button — only visible to admin email -->
+            <button onclick="openAdminPanel()" id="admin-btn" class="hidden text-xs font-bold bg-red-900 border border-red-700 text-red-300 px-4 py-1.5 rounded hover:bg-red-800">
+                <i class="fas fa-shield-alt mr-1"></i> ADMIN
+            </button>
             <button onclick="openUploadModal()" id="upload-btn" class="hidden text-xs font-bold bg-transparent border border-[#444] px-4 py-1.5 rounded hover:bg-[#222]">
                 <i class="fas fa-upload mr-1"></i> YÜKLE
             </button>
@@ -395,6 +463,8 @@
                 <div class="w-8 h-8 bg-[#333] rounded-full flex items-center justify-center font-bold text-xs border border-[#444] cursor-pointer" id="user-avatar" onclick="toggleUserDropdown()">U</div>
                 <div id="user-dropdown" class="hidden absolute top-10 right-0 bg-[#222] border border-[#333] rounded shadow-xl z-50 py-1 min-w-[160px]">
                     <div class="px-4 py-2 text-xs text-gray-400 border-b border-[#333]" id="dropdown-email"></div>
+                    <!-- FEATURE 1: Profile button -->
+                    <div onclick="showProfilePage(null)" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer"><i class="fas fa-user mr-2 text-[#ffa500]"></i>Profilim</div>
                     <div onclick="showMyVideos()" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer"><i class="fas fa-film mr-2 text-[#ffa500]"></i>Videolarım</div>
                     <div onclick="doSignOut()" class="px-4 py-2 text-sm font-bold hover:bg-[#333] cursor-pointer text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Çıkış Yap</div>
                 </div>
@@ -435,12 +505,15 @@
             <div id="main-player-container" class="aspect-video w-full rounded shadow-lg overflow-hidden"></div>
             <div class="mt-4">
                 <h1 id="player-title" class="text-xl font-bold"></h1>
+                <!-- FEATURE 4: View count display -->
+                <div id="player-views" class="mt-1"><i class="fas fa-eye mr-1 text-gray-600"></i><span id="player-views-count">0</span> görüntülenme</div>
                 <p id="player-desc" class="text-sm text-gray-400 mt-2 leading-relaxed"></p>
                 <div class="flex items-center justify-between mt-4 bg-[#1b1b1b] p-3 rounded">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-[#333] rounded flex items-center justify-center font-bold text-xs border border-[#444]" id="player-avatar">U</div>
+                        <div class="w-10 h-10 bg-[#333] rounded flex items-center justify-center font-bold text-xs border border-[#444] cursor-pointer" id="player-avatar" onclick="showProfilePage(currentAuthorId)">U</div>
                         <div>
-                            <h3 id="player-author" class="font-bold text-sm"></h3>
+                            <!-- FEATURE 1: Author name links to profile -->
+                            <h3 id="player-author" class="font-bold text-sm cursor-pointer hover:text-[#ffa500] transition-colors" onclick="showProfilePage(currentAuthorId)"></h3>
                             <p class="text-[10px] text-gray-500 font-bold">ÜYE</p>
                         </div>
                     </div>
@@ -476,6 +549,44 @@
             <h4 class="text-xs font-bold text-gray-400 mb-3 border-b border-[#333] pb-1">Sıradaki Videolar</h4>
             <div id="sidebar-grid" class="flex flex-col gap-3 custom-scrollbar" style="max-height:600px;overflow-y:auto;"></div>
         </div>
+    </div>
+</main>
+
+<!-- ============================================================
+     FEATURE 1 — USER PROFILE PAGE
+============================================================ -->
+<main id="view-profile" class="max-w-[1400px] mx-auto p-4">
+    <div class="mb-4">
+        <button onclick="showPage('home')" class="text-xs font-bold text-gray-500 hover:text-[#ffa500] transition-colors mb-4 flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </button>
+        <!-- Profile Header -->
+        <div class="bg-[#1b1b1b] border border-[#333] rounded-lg p-6 mb-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div class="profile-avatar-large" id="profile-avatar-large">U</div>
+                <div class="flex-1">
+                    <h2 class="text-2xl font-black" id="profile-username">Yükleniyor...</h2>
+                    <p class="text-xs text-gray-500 mt-1" id="profile-email-display"></p>
+                    <div class="flex gap-3 mt-4 flex-wrap">
+                        <div class="profile-stat">
+                            <div class="stat-val" id="profile-video-count">0</div>
+                            <div class="stat-lbl">Video</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="stat-val" id="profile-total-views">0</div>
+                            <div class="stat-lbl">Toplam İzlenme</div>
+                        </div>
+                        <div class="profile-stat">
+                            <div class="stat-val" id="profile-total-likes">0</div>
+                            <div class="stat-lbl">Toplam Beğeni</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Profile Videos -->
+        <h3 class="text-sm font-bold text-gray-400 mb-3 border-b border-[#333] pb-1" id="profile-videos-title">Videoları</h3>
+        <div id="profile-video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
     </div>
 </main>
 
@@ -621,6 +732,38 @@
     </div>
 </div>
 
+<!-- ============================================================
+     FEATURE 2 — ADMIN PANEL MODAL
+============================================================ -->
+<div id="admin-panel-modal" class="modal">
+    <div class="bg-[#111] border border-[#444] w-full max-w-4xl rounded shadow-2xl max-h-[90vh] flex flex-col" style="overflow:hidden;">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-[#333] flex-shrink-0">
+            <h2 class="font-black text-sm flex items-center gap-2"><i class="fas fa-shield-alt text-red-400"></i> ADMİN PANELİ</h2>
+            <button onclick="closeModal('admin-panel-modal')" class="text-gray-500 hover:text-white text-lg"><i class="fas fa-times"></i></button>
+        </div>
+        <!-- Tabs -->
+        <div class="flex border-b border-[#333] px-4 flex-shrink-0">
+            <button class="admin-tab-btn active" onclick="switchAdminTab('videos', this)"><i class="fas fa-film mr-1"></i>Videolar (<span id="admin-video-count">0</span>)</button>
+            <button class="admin-tab-btn" onclick="switchAdminTab('users', this)"><i class="fas fa-users mr-1"></i>Kullanıcılar (<span id="admin-user-count">0</span>)</button>
+        </div>
+        <!-- Content -->
+        <div class="overflow-y-auto flex-1 custom-scrollbar">
+            <!-- Videos Tab -->
+            <div id="admin-tab-videos" class="p-4">
+                <div id="admin-videos-list">
+                    <div class="text-center py-10 text-gray-500 text-xs"><div class="spinner mx-auto mb-3"></div>Yükleniyor...</div>
+                </div>
+            </div>
+            <!-- Users Tab -->
+            <div id="admin-tab-users" class="p-4 hidden">
+                <div id="admin-users-list">
+                    <div class="text-center py-10 text-gray-500 text-xs"><div class="spinner mx-auto mb-3"></div>Yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
@@ -663,6 +806,19 @@
     let editThumbUrlToUse = null;
     let commentsUnsubscribe = null;
     let autoThumbnailBlob = null;
+
+    // FEATURE 1: Track currently viewed profile author id
+    let currentAuthorId = null;
+    window.currentAuthorId = null; // expose for onclick handlers
+
+    // FEATURE 2: Admin email constant
+    const ADMIN_EMAIL = 'beyneymen10@gmail.com';
+
+    // FEATURE 3: Track active hover preview elements to clean up
+    let activePreviewEl = null;
+
+    // FEATURE 4: Track if view has already been counted for current video session
+    let viewCountedForVideo = null;
 
     // ===================== HACKER MODE (Easter Egg) =====================
     let hackerBuffer = '';
@@ -739,6 +895,9 @@
         }
         document.getElementById('comment-input-area').classList.toggle('hidden', !user);
         document.getElementById('no-login-comment').classList.toggle('hidden', !!user);
+        // FEATURE 2: Show admin button only for admin email
+        const isAdmin = user && user.email === ADMIN_EMAIL;
+        document.getElementById('admin-btn').classList.toggle('hidden', !isAdmin);
     }
 
     window.toggleUserDropdown = () => {
@@ -832,9 +991,11 @@
     }
 
     // ===================== RENDER GRID =====================
-    function renderGrid(data) {
-        const grid = document.getElementById('video-grid');
-        document.getElementById('video-count').textContent = data.length + ' video';
+    function renderGrid(data, targetGridId = 'video-grid') {
+        const grid = document.getElementById(targetGridId);
+        if (targetGridId === 'video-grid') {
+            document.getElementById('video-count').textContent = data.length + ' video';
+        }
         if (data.length === 0) {
             grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500"><i class="fas fa-film text-4xl mb-4 block opacity-30"></i><p class="text-sm font-bold">Henüz video yok.</p><p class="text-xs mt-1">İlk videoyu yükleyen sen ol!</p></div>`;
             return;
@@ -842,19 +1003,34 @@
         grid.innerHTML = data.map(v => {
             const isOwner = currentUser && currentUser.uid === v.authorId;
             const likeCount = v.likeCount || 0;
+            const viewCount = v.views || 0;
+            const thumbSrc = escapeHtml(v.thumbnail || 'https://placehold.co/320x180/1b1b1b/444?text=No+Thumb');
+            const videoUrl = escapeHtml(v.videoUrl || '');
             return `
             <div class="video-card group relative" style="cursor:default;">
-                <div class="video-thumbnail" onclick="playVideo('${v.id}')" style="cursor:pointer;">
-                    <img src="${escapeHtml(v.thumbnail || 'https://placehold.co/320x180/1b1b1b/444?text=No+Thumb')}"
-                         class="w-full aspect-video object-cover"
-                         onerror="this.src='https://placehold.co/320x180/1b1b1b/444?text=No+Thumb'">
+                <!-- FEATURE 3: Hover preview thumbnail wrapper -->
+                <div class="video-thumbnail"
+                    onclick="playVideo('${v.id}')" style="cursor:pointer;"
+                    data-videoid="${v.id}" data-videourl="${videoUrl}"
+                    onmouseenter="startHoverPreview(this,'${videoUrl}')"
+                    onmouseleave="stopHoverPreview(this,'${thumbSrc}')">
+                    <img class="thumb-img w-full aspect-video object-cover"
+                        src="${thumbSrc}"
+                        onerror="this.src='https://placehold.co/320x180/1b1b1b/444?text=No+Thumb'">
+                    <video class="thumb-vid" muted loop preload="none" tabindex="-1"></video>
                     <span class="duration-badge"><i class="fas fa-video mr-1 text-[#ffa500]"></i>${v.duration ? formatDuration(v.duration) : 'MP4'}</span>
                 </div>
                 <div class="mt-2 px-1">
                     <h3 class="text-xs font-bold line-clamp-2 text-white group-hover:text-[#ffa500] cursor-pointer" onclick="playVideo('${v.id}')">${escapeHtml(v.title)}</h3>
-                    <p class="text-[10px] text-gray-500 font-bold mt-1 uppercase">${escapeHtml(v.authorName || 'Anonim')}</p>
+                    <!-- FEATURE 1: Author name links to profile -->
+                    <p class="text-[10px] text-gray-500 font-bold mt-1 uppercase cursor-pointer hover:text-[#ffa500] transition-colors"
+                       onclick="event.stopPropagation(); showProfilePage('${v.authorId}')">${escapeHtml(v.authorName || 'Anonim')}</p>
                     <div class="flex items-center justify-between mt-1">
-                        <p class="text-[10px] text-gray-500 font-bold">${formatDate(v.createdAt)}</p>
+                        <div class="flex items-center gap-2">
+                            <p class="text-[10px] text-gray-500 font-bold">${formatDate(v.createdAt)}</p>
+                            <!-- FEATURE 4: View count badge -->
+                            <span class="views-badge"><i class="fas fa-eye"></i>${formatViews(viewCount)}</span>
+                        </div>
                         <button onclick="toggleLikeCard(event,'${v.id}')" id="card-like-${v.id}"
                             class="like-btn flex items-center gap-1 text-[10px] font-bold text-gray-500 hover:text-[#ffa500] transition-colors px-1 py-0.5 rounded bg-[#1a1a1a]">
                             <i class="fas fa-thumbs-up text-[10px]"></i>
@@ -884,6 +1060,10 @@
         document.getElementById('player-author').textContent = video.authorName || 'Anonim';
         document.getElementById('player-avatar').textContent = (video.authorName || 'A').substring(0, 2).toUpperCase();
 
+        // FEATURE 1: Store authorId for profile navigation
+        currentAuthorId = video.authorId || null;
+        window.currentAuthorId = currentAuthorId;
+
         const isOwner = currentUser && currentUser.uid === video.authorId;
         document.getElementById('edit-video-btn').classList.toggle('hidden', !isOwner);
         document.getElementById('delete-video-btn').classList.toggle('hidden', !isOwner);
@@ -891,6 +1071,16 @@
         document.getElementById('delete-video-btn').onclick = () => openDeleteModal(videoId);
 
         updateLikeUI(video);
+
+        // FEATURE 4: Show view count in player
+        const viewsEl = document.getElementById('player-views-count');
+        if (viewsEl) viewsEl.textContent = formatViews(video.views || 0);
+
+        // FEATURE 4: Increment view count once per video session
+        if (viewCountedForVideo !== videoId) {
+            viewCountedForVideo = videoId;
+            incrementViewCount(videoId);
+        }
 
         const container = document.getElementById('main-player-container');
         
@@ -1370,6 +1560,7 @@
                 authorName: currentUser.displayName || currentUser.email,
                 likeCount: 0,
                 likedBy: [],
+                views: 0,
                 createdAt: serverTimestamp()
             });
 
@@ -1460,10 +1651,8 @@
     window.showMyVideos = () => {
         document.getElementById('user-dropdown').classList.add('hidden');
         if (!currentUser) { openModal('login-modal'); return; }
-        const myVids = allVideos.filter(v => v.authorId === currentUser.uid);
-        renderGrid(myVids);
-        document.getElementById('home-title').textContent = `📁 Videolarım (${myVids.length})`;
-        showPage('home');
+        // FEATURE 1: Redirect to full profile page instead of just filtering grid
+        showProfilePage(currentUser.uid);
     };
 
     // ===================== SEARCH =====================
@@ -1485,6 +1674,15 @@
     window.showPage = (page) => {
         document.getElementById('view-home').classList.toggle('hidden', page !== 'home');
         document.getElementById('view-player').classList.toggle('hidden', page !== 'player');
+        // FEATURE 1: Profile page routing
+        const profileEl = document.getElementById('view-profile');
+        if (page === 'profile') {
+            profileEl.classList.remove('hidden');
+            profileEl.classList.add('active');
+        } else {
+            profileEl.classList.add('hidden');
+            profileEl.classList.remove('active');
+        }
         if (page === 'home') {
             document.getElementById('home-title').textContent = 'Önerilen Videolar';
             renderGrid(allVideos);
@@ -1510,6 +1708,284 @@
         const s = Math.floor(sec % 60);
         return `${m}:${s.toString().padStart(2,'0')}`;
     }
+
+    // ============================================================
+    // FEATURE 4 — VIEW COUNT: formatViews helper
+    // ============================================================
+    function formatViews(n) {
+        if (!n || isNaN(n)) return '0';
+        if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return String(n);
+    }
+
+    // FEATURE 4 — Increment view count in Firestore (once per session per video)
+    async function incrementViewCount(videoId) {
+        try {
+            await updateDoc(doc(db, 'videos', videoId), { views: increment(1) });
+            // Update local cache too
+            const idx = allVideos.findIndex(v => v.id === videoId);
+            if (idx !== -1) allVideos[idx].views = (allVideos[idx].views || 0) + 1;
+            // Refresh player view count display
+            const viewsEl = document.getElementById('player-views-count');
+            if (viewsEl && currentPlayingVideo && currentPlayingVideo.id === videoId) {
+                viewsEl.textContent = formatViews(allVideos[idx]?.views || 0);
+            }
+        } catch (e) {
+            console.warn('View count increment failed:', e);
+        }
+    }
+
+    // ============================================================
+    // FEATURE 1 — USER PROFILE PAGE
+    // ============================================================
+    window.showProfilePage = async (authorId) => {
+        if (!authorId) {
+            // Fallback: show own profile if logged in
+            if (!currentUser) { openModal('login-modal'); return; }
+            authorId = currentUser.uid;
+        }
+        document.getElementById('user-dropdown').classList.add('hidden');
+        showPage('profile');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Get videos by this author
+        const userVideos = allVideos.filter(v => v.authorId === authorId);
+
+        // Derive display name from videos or fallback
+        const authorName = userVideos.length > 0
+            ? (userVideos[0].authorName || 'Kullanıcı')
+            : (currentUser && currentUser.uid === authorId
+                ? (currentUser.displayName || currentUser.email || 'Kullanıcı')
+                : 'Kullanıcı');
+
+        // Stats
+        const totalViews = userVideos.reduce((sum, v) => sum + (v.views || 0), 0);
+        const totalLikes = userVideos.reduce((sum, v) => sum + (v.likeCount || 0), 0);
+        const initials = authorName.substring(0, 2).toUpperCase();
+
+        // Populate header
+        document.getElementById('profile-avatar-large').textContent = initials;
+        document.getElementById('profile-username').textContent = authorName;
+        document.getElementById('profile-video-count').textContent = userVideos.length;
+        document.getElementById('profile-total-views').textContent = formatViews(totalViews);
+        document.getElementById('profile-total-likes').textContent = formatViews(totalLikes);
+        document.getElementById('profile-videos-title').textContent = `${authorName} Videoları`;
+
+        // Show email only for own profile
+        const emailEl = document.getElementById('profile-email-display');
+        if (currentUser && currentUser.uid === authorId) {
+            emailEl.textContent = currentUser.email;
+        } else {
+            emailEl.textContent = '';
+        }
+
+        // Render their videos in profile grid
+        renderGrid(userVideos, 'profile-video-grid');
+    };
+
+    // ============================================================
+    // FEATURE 2 — ADMIN PANEL
+    // ============================================================
+    window.openAdminPanel = () => {
+        // Security: double-check on client before opening
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+            showToast('Erişim reddedildi.', true);
+            return;
+        }
+        openModal('admin-panel-modal');
+        loadAdminVideos();
+    };
+
+    window.switchAdminTab = (tab, btn) => {
+        // Update tab button styles
+        document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Show/hide tab content
+        document.getElementById('admin-tab-videos').classList.toggle('hidden', tab !== 'videos');
+        document.getElementById('admin-tab-users').classList.toggle('hidden', tab !== 'users');
+        // Load data for tab
+        if (tab === 'users') loadAdminUsers();
+    };
+
+    async function loadAdminVideos() {
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
+        const listEl = document.getElementById('admin-videos-list');
+        const countEl = document.getElementById('admin-video-count');
+        listEl.innerHTML = `<div class="text-center py-10 text-gray-500 text-xs"><div class="spinner mx-auto mb-3"></div>Yükleniyor...</div>`;
+        try {
+            const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            const videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            countEl.textContent = videos.length;
+            if (videos.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-gray-500 text-xs py-8">Video bulunamadı.</p>`;
+                return;
+            }
+            listEl.innerHTML = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px">Kapak</th>
+                            <th>Başlık</th>
+                            <th>Yükleyen</th>
+                            <th>Tarih</th>
+                            <th style="text-align:right">İzlenme</th>
+                            <th style="text-align:right">Beğeni</th>
+                            <th style="text-align:right">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${videos.map(v => `
+                            <tr>
+                                <td><img src="${escapeHtml(v.thumbnail || 'https://placehold.co/60x34/1b1b1b/444')}"
+                                    style="width:60px;aspect-ratio:16/9;object-fit:cover;border-radius:3px;"
+                                    onerror="this.src='https://placehold.co/60x34/1b1b1b/444'"></td>
+                                <td style="max-width:200px;"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</div></td>
+                                <td class="text-gray-400">${escapeHtml(v.authorName || 'Anonim')}</td>
+                                <td class="text-gray-500">${formatDate(v.createdAt)}</td>
+                                <td style="text-align:right" class="text-gray-400">${formatViews(v.views || 0)}</td>
+                                <td style="text-align:right" class="text-gray-400">${v.likeCount || 0}</td>
+                                <td style="text-align:right">
+                                    <button onclick="adminDeleteVideo('${v.id}')"
+                                        class="bg-red-900 hover:bg-red-700 text-red-300 text-[10px] font-bold px-2 py-1 rounded transition-colors">
+                                        <i class="fas fa-trash"></i> Sil
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        } catch (e) {
+            listEl.innerHTML = `<p class="text-red-400 text-xs text-center py-8">Hata: ${e.message}</p>`;
+        }
+    }
+
+    async function loadAdminUsers() {
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
+        const listEl = document.getElementById('admin-users-list');
+        const countEl = document.getElementById('admin-user-count');
+        listEl.innerHTML = `<div class="text-center py-10 text-gray-500 text-xs"><div class="spinner mx-auto mb-3"></div>Yükleniyor...</div>`;
+        try {
+            // Derive unique users from the videos collection (no admin SDK needed)
+            const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            const videos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Aggregate unique users
+            const usersMap = new Map();
+            videos.forEach(v => {
+                if (!v.authorId) return;
+                if (!usersMap.has(v.authorId)) {
+                    usersMap.set(v.authorId, { id: v.authorId, name: v.authorName || 'Anonim', videoCount: 0, totalViews: 0, totalLikes: 0 });
+                }
+                const u = usersMap.get(v.authorId);
+                u.videoCount++;
+                u.totalViews += v.views || 0;
+                u.totalLikes += v.likeCount || 0;
+            });
+
+            const users = Array.from(usersMap.values()).sort((a,b) => b.videoCount - a.videoCount);
+            countEl.textContent = users.length;
+
+            if (users.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-gray-500 text-xs py-8">Kullanıcı bulunamadı.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Kullanıcı Adı</th>
+                            <th style="text-align:right">Video</th>
+                            <th style="text-align:right">Toplam İzlenme</th>
+                            <th style="text-align:right">Toplam Beğeni</th>
+                            <th style="text-align:right">Profil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(u => `
+                            <tr>
+                                <td>
+                                    <div style="width:32px;height:32px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--ph-orange);border:1px solid #444;">
+                                        ${u.name.substring(0,2).toUpperCase()}
+                                    </div>
+                                </td>
+                                <td class="font-bold">${escapeHtml(u.name)}</td>
+                                <td style="text-align:right" class="text-gray-400">${u.videoCount}</td>
+                                <td style="text-align:right" class="text-gray-400">${formatViews(u.totalViews)}</td>
+                                <td style="text-align:right" class="text-gray-400">${u.totalLikes}</td>
+                                <td style="text-align:right">
+                                    <button onclick="closeModal('admin-panel-modal'); showProfilePage('${u.id}')"
+                                        class="bg-[#333] hover:bg-[#444] text-[10px] font-bold px-2 py-1 rounded transition-colors text-[#ffa500]">
+                                        <i class="fas fa-user"></i> Profil
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        } catch (e) {
+            listEl.innerHTML = `<p class="text-red-400 text-xs text-center py-8">Hata: ${e.message}</p>`;
+        }
+    }
+
+    window.adminDeleteVideo = async (videoId) => {
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
+        if (!confirm('Bu videoyu silmek istediğine emin misin?')) return;
+        try {
+            await deleteDoc(doc(db, 'videos', videoId));
+            showToast('Video admin tarafından silindi.');
+            await loadVideos();
+            loadAdminVideos(); // Refresh admin list
+            if (currentPlayingVideo && currentPlayingVideo.id === videoId) showPage('home');
+        } catch (e) {
+            showToast('Silme hatası: ' + e.message, true);
+        }
+    };
+
+    // ============================================================
+    // FEATURE 3 — HOVER PREVIEW
+    // ============================================================
+    let _previewTimer = null;
+
+    window.startHoverPreview = (thumbEl, videoUrl) => {
+        if (!videoUrl) return;
+        // Small delay before starting preview (avoids flicker on quick mouse-overs)
+        _previewTimer = setTimeout(() => {
+            const vidEl = thumbEl.querySelector('.thumb-vid');
+            if (!vidEl) return;
+            // Stop any previously active preview
+            if (activePreviewEl && activePreviewEl !== thumbEl) {
+                stopHoverPreview(activePreviewEl, null);
+            }
+            activePreviewEl = thumbEl;
+            vidEl.src = videoUrl;
+            vidEl.currentTime = 1.5; // Start from 1.5 seconds in
+            thumbEl.classList.add('previewing');
+            const playPromise = vidEl.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Autoplay blocked — revert silently
+                    thumbEl.classList.remove('previewing');
+                });
+            }
+        }, 400);
+    };
+
+    window.stopHoverPreview = (thumbEl, fallbackSrc) => {
+        clearTimeout(_previewTimer);
+        const vidEl = thumbEl.querySelector('.thumb-vid');
+        if (vidEl) {
+            vidEl.pause();
+            vidEl.removeAttribute('src');
+            vidEl.load();
+        }
+        thumbEl.classList.remove('previewing');
+        if (activePreviewEl === thumbEl) activePreviewEl = null;
+    };
 
     // ===================== CINEHUB CUSTOM PLAYER =====================
     function initCineHubPlayer(vid) {
