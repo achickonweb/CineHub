@@ -85,6 +85,244 @@
             0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
         }
         .hacker-flash { animation: matrix-flash 0.3s ease 3; }
+
+        /* ============================================================
+           CUSTOM VIDEO PLAYER CONTROLS
+        ============================================================ */
+        #cinehub-player-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            cursor: default;
+        }
+        #cinehub-player-wrap video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Control bar — hidden by default, slides up on hover */
+        #cinehub-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0 16px 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.28s ease, transform 0.28s ease;
+            z-index: 10;
+        }
+        #cinehub-player-wrap:hover #cinehub-controls,
+        #cinehub-player-wrap.show-controls #cinehub-controls {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Big center play/pause flash icon */
+        #cinehub-center-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%) scale(0.5);
+            opacity: 0;
+            pointer-events: none;
+            font-size: 52px;
+            color: rgba(255,255,255,0.9);
+            transition: all 0.15s ease;
+            z-index: 11;
+            text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+        }
+        #cinehub-center-icon.flash {
+            transform: translate(-50%,-50%) scale(1);
+            opacity: 1;
+        }
+
+        /* ---- PROGRESS BAR ---- */
+        #cinehub-progress-wrap {
+            position: relative;
+            width: 100%;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+        #cinehub-progress-bg {
+            position: absolute;
+            left: 0; right: 0;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            transition: height 0.18s ease;
+            overflow: hidden;
+        }
+        #cinehub-progress-wrap:hover #cinehub-progress-bg {
+            height: 5px;
+        }
+        #cinehub-progress-fill {
+            height: 100%;
+            background: var(--ph-orange);
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+            transition: width 0.1s linear;
+        }
+        #cinehub-progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background: var(--ph-orange);
+            border-radius: 50%;
+            transition: transform 0.18s ease;
+        }
+        #cinehub-progress-wrap:hover #cinehub-progress-fill::after {
+            transform: translateY(-50%) scale(1);
+        }
+        /* invisible range input overlaid for drag */
+        #cinehub-progress-range {
+            position: absolute;
+            left: 0; right: 0; top: 0; bottom: 0;
+            width: 100%;
+            opacity: 0;
+            cursor: pointer;
+            margin: 0;
+            -webkit-appearance: none;
+        }
+
+        /* ---- BOTTOM ROW ---- */
+        .cinehub-ctrl-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cinehub-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px 7px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1;
+            transition: color 0.15s, background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cinehub-btn:hover {
+            color: var(--ph-orange);
+            background: rgba(255,255,255,0.07);
+        }
+
+        /* ---- TIME DISPLAY ---- */
+        #cinehub-time {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* ---- VOLUME ---- */
+        #cinehub-volume-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #cinehub-volume-slider {
+            width: 0px;
+            overflow: hidden;
+            transition: width 0.22s ease;
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        #cinehub-volume-wrap:hover #cinehub-volume-slider,
+        #cinehub-volume-wrap:focus-within #cinehub-volume-slider {
+            width: 64px;
+        }
+        #cinehub-volume-slider::-webkit-slider-runnable-track {
+            height: 3px;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--ph-orange) var(--vol, 100%), rgba(255,255,255,0.25) var(--vol, 100%));
+        }
+        #cinehub-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--ph-orange);
+            margin-top: -3.5px;
+        }
+        #cinehub-volume-slider::-moz-range-track {
+            height: 3px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.25);
+        }
+        #cinehub-volume-slider::-moz-range-thumb {
+            border: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--ph-orange);
+        }
+
+        /* ---- SPEED MENU ---- */
+        #cinehub-speed-wrap {
+            position: relative;
+        }
+        #cinehub-speed-btn {
+            font-size: 11px;
+            font-weight: 900;
+            font-family: 'Share Tech Mono', monospace;
+            padding: 3px 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        #cinehub-speed-menu {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            right: 0;
+            background: rgba(18,18,18,0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            min-width: 72px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        #cinehub-speed-menu.open { display: flex; }
+        .cinehub-speed-opt {
+            padding: 7px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ccc;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.12s, color 0.12s;
+        }
+        .cinehub-speed-opt:hover, .cinehub-speed-opt.active {
+            background: rgba(255,255,255,0.08);
+            color: var(--ph-orange);
+        }
+
+        /* ---- SPACER ---- */
+        .cinehub-spacer { flex: 1; }
     </style>
 </head>
 <body class="custom-scrollbar">
@@ -659,18 +897,56 @@
         if (video.videoUrl) {
             // Önce controls olmadan introvideo.mp4 oynatmaya çalış
             container.innerHTML = `
-                <video id="main-video-el" autoplay style="width:100%;height:100%;background:#000;object-fit:contain;"
-                    src="introvideo.mp4">
-                    Tarayıcınız video etiketini desteklemiyor.
-                </video>`;
+                <div id="cinehub-player-wrap">
+                    <video id="main-video-el" autoplay style="width:100%;height:100%;background:#000;object-fit:contain;"
+                        src="introvideo.mp4">
+                        Tarayıcınız video etiketini desteklemiyor.
+                    </video>
+                    <div id="cinehub-center-icon"><i class="fas fa-play"></i></div>
+                    <div id="cinehub-controls">
+                        <div id="cinehub-progress-wrap">
+                            <div id="cinehub-progress-bg"><div id="cinehub-progress-fill"></div></div>
+                            <input type="range" id="cinehub-progress-range" min="0" max="100" step="0.1" value="0">
+                        </div>
+                        <div class="cinehub-ctrl-row">
+                            <button class="cinehub-btn" id="cinehub-play-btn" title="Oynat/Durdur">
+                                <i class="fas fa-play" id="cinehub-play-icon"></i>
+                            </button>
+                            <div id="cinehub-volume-wrap">
+                                <button class="cinehub-btn" id="cinehub-mute-btn" title="Ses Aç/Kapa">
+                                    <i class="fas fa-volume-up" id="cinehub-vol-icon"></i>
+                                </button>
+                                <input type="range" id="cinehub-volume-slider" min="0" max="1" step="0.02" value="1">
+                            </div>
+                            <span id="cinehub-time">0:00 / 0:00</span>
+                            <div class="cinehub-spacer"></div>
+                            <div id="cinehub-speed-wrap">
+                                <button class="cinehub-btn" id="cinehub-speed-btn" title="Hiz">1x</button>
+                                <div id="cinehub-speed-menu">
+                                    <div class="cinehub-speed-opt" data-speed="0.5">0.5x</div>
+                                    <div class="cinehub-speed-opt" data-speed="0.75">0.75x</div>
+                                    <div class="cinehub-speed-opt active" data-speed="1">1x</div>
+                                    <div class="cinehub-speed-opt" data-speed="1.25">1.25x</div>
+                                    <div class="cinehub-speed-opt" data-speed="1.5">1.5x</div>
+                                    <div class="cinehub-speed-opt" data-speed="1.75">1.75x</div>
+                                    <div class="cinehub-speed-opt" data-speed="2">2x</div>
+                                </div>
+                            </div>
+                            <button class="cinehub-btn" id="cinehub-fs-btn" title="Tam Ekran">
+                                <i class="fas fa-expand" id="cinehub-fs-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
                 
             const mainVidEl = document.getElementById('main-video-el');
+            initCineHubPlayer(mainVidEl);
 
             // Asıl videoya sorunsuzca geçiş yapacak fonksiyon
             const playMainVideo = () => {
                 mainVidEl.src = escapeHtml(video.videoUrl);
-                mainVidEl.controls = true; // Asıl video başlayınca kontrolleri geri getir
-                
+                // Custom controls aktif — native controls kullanılmıyor
+
                 const playPromise = mainVidEl.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => console.log('Asıl video otomatik oynatılamadı:', e));
@@ -1233,6 +1509,181 @@
         const m = Math.floor(sec / 60);
         const s = Math.floor(sec % 60);
         return `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    // ===================== CINEHUB CUSTOM PLAYER =====================
+    function initCineHubPlayer(vid) {
+        const wrap       = document.getElementById('cinehub-player-wrap');
+        const playBtn    = document.getElementById('cinehub-play-btn');
+        const playIcon   = document.getElementById('cinehub-play-icon');
+        const muteBtn    = document.getElementById('cinehub-mute-btn');
+        const volIcon    = document.getElementById('cinehub-vol-icon');
+        const volSlider  = document.getElementById('cinehub-volume-slider');
+        const progRange  = document.getElementById('cinehub-progress-range');
+        const progFill   = document.getElementById('cinehub-progress-fill');
+        const timeEl     = document.getElementById('cinehub-time');
+        const speedBtn   = document.getElementById('cinehub-speed-btn');
+        const speedMenu  = document.getElementById('cinehub-speed-menu');
+        const speedOpts  = document.querySelectorAll('.cinehub-speed-opt');
+        const fsBtn      = document.getElementById('cinehub-fs-btn');
+        const fsIcon     = document.getElementById('cinehub-fs-icon');
+        const centerIcon = document.getElementById('cinehub-center-icon');
+
+        if (!vid || !wrap) return;
+
+        let hideControlsTimer = null;
+        let isSeeking = false;
+
+        // ---- HELPERS ----
+        function fmt(s) {
+            if (!s || isNaN(s)) return '0:00';
+            const m = Math.floor(s / 60);
+            const ss = Math.floor(s % 60);
+            return `${m}:${ss.toString().padStart(2,'0')}`;
+        }
+
+        function flashIcon(iconClass) {
+            centerIcon.innerHTML = `<i class="${iconClass}"></i>`;
+            centerIcon.classList.add('flash');
+            setTimeout(() => centerIcon.classList.remove('flash'), 500);
+        }
+
+        function updatePlayIcon() {
+            playIcon.className = vid.paused ? 'fas fa-play' : 'fas fa-pause';
+        }
+
+        function updateVolIcon() {
+            if (vid.muted || vid.volume === 0) {
+                volIcon.className = 'fas fa-volume-mute';
+            } else if (vid.volume < 0.5) {
+                volIcon.className = 'fas fa-volume-down';
+            } else {
+                volIcon.className = 'fas fa-volume-up';
+            }
+            const pct = vid.muted ? 0 : Math.round(vid.volume * 100);
+            volSlider.style.setProperty('--vol', pct + '%');
+        }
+
+        function updateProgress() {
+            if (!isSeeking && vid.duration) {
+                const pct = (vid.currentTime / vid.duration) * 100;
+                progFill.style.width = pct + '%';
+                progRange.value = pct;
+                timeEl.textContent = fmt(vid.currentTime) + ' / ' + fmt(vid.duration);
+            }
+        }
+
+        // ---- AUTO-HIDE CONTROLS ----
+        function showControls() {
+            wrap.classList.add('show-controls');
+            wrap.style.cursor = 'default';
+            clearTimeout(hideControlsTimer);
+            hideControlsTimer = setTimeout(() => {
+                if (!vid.paused) {
+                    wrap.classList.remove('show-controls');
+                    wrap.style.cursor = 'none';
+                }
+            }, 3000);
+        }
+
+        wrap.addEventListener('mousemove', showControls);
+        wrap.addEventListener('mouseleave', () => {
+            clearTimeout(hideControlsTimer);
+            if (!vid.paused) wrap.classList.remove('show-controls');
+        });
+
+        // ---- PLAY / PAUSE ----
+        playBtn.addEventListener('click', () => {
+            if (vid.paused) { vid.play(); flashIcon('fas fa-play'); }
+            else { vid.pause(); flashIcon('fas fa-pause'); }
+        });
+
+        // Click on video area toggles play
+        vid.addEventListener('click', () => {
+            if (vid.paused) { vid.play(); flashIcon('fas fa-play'); }
+            else { vid.pause(); flashIcon('fas fa-pause'); }
+        });
+
+        vid.addEventListener('play',  () => { updatePlayIcon(); showControls(); });
+        vid.addEventListener('pause', () => { updatePlayIcon(); wrap.classList.add('show-controls'); wrap.style.cursor = 'default'; });
+        vid.addEventListener('timeupdate', updateProgress);
+        vid.addEventListener('loadedmetadata', updateProgress);
+
+        // ---- PROGRESS SEEK ----
+        progRange.addEventListener('mousedown', () => { isSeeking = true; });
+        progRange.addEventListener('input', () => {
+            if (vid.duration) {
+                const t = (progRange.value / 100) * vid.duration;
+                progFill.style.width = progRange.value + '%';
+                timeEl.textContent = fmt(t) + ' / ' + fmt(vid.duration);
+            }
+        });
+        progRange.addEventListener('change', () => {
+            if (vid.duration) vid.currentTime = (progRange.value / 100) * vid.duration;
+            isSeeking = false;
+        });
+        progRange.addEventListener('mouseup', () => { isSeeking = false; });
+
+        // ---- VOLUME ----
+        muteBtn.addEventListener('click', () => {
+            vid.muted = !vid.muted;
+            updateVolIcon();
+        });
+        volSlider.addEventListener('input', () => {
+            vid.volume = parseFloat(volSlider.value);
+            vid.muted = vid.volume === 0;
+            updateVolIcon();
+        });
+        updateVolIcon();
+
+        // ---- SPEED ----
+        speedBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            speedMenu.classList.toggle('open');
+        });
+        speedOpts.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const spd = parseFloat(opt.dataset.speed);
+                vid.playbackRate = spd;
+                speedBtn.textContent = spd === 1 ? '1x' : spd + 'x';
+                speedOpts.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                speedMenu.classList.remove('open');
+            });
+        });
+        document.addEventListener('click', () => speedMenu.classList.remove('open'));
+
+        // ---- FULLSCREEN ----
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                wrap.requestFullscreen && wrap.requestFullscreen();
+            } else {
+                document.exitFullscreen && document.exitFullscreen();
+            }
+        });
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement === wrap) {
+                fsIcon.className = 'fas fa-compress';
+            } else {
+                fsIcon.className = 'fas fa-expand';
+            }
+        });
+
+        // ---- KEYBOARD SHORTCUTS ----
+        document.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+            if (!document.getElementById('cinehub-player-wrap')) return;
+            if (e.code === 'Space') { e.preventDefault(); vid.paused ? vid.play() : vid.pause(); }
+            if (e.code === 'ArrowRight') { vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 5); }
+            if (e.code === 'ArrowLeft')  { vid.currentTime = Math.max(0, vid.currentTime - 5); }
+            if (e.code === 'ArrowUp')    { vid.volume = Math.min(1, vid.volume + 0.1); volSlider.value = vid.volume; updateVolIcon(); }
+            if (e.code === 'ArrowDown')  { vid.volume = Math.max(0, vid.volume - 0.1); volSlider.value = vid.volume; updateVolIcon(); }
+            if (e.code === 'KeyM')       { vid.muted = !vid.muted; updateVolIcon(); }
+            if (e.code === 'KeyF')       { fsBtn.click(); }
+        });
+
+        showControls();
     }
 </script>
 
